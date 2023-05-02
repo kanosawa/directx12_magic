@@ -1,5 +1,11 @@
 #pragma once
 
+#include <Windows.h>
+#include <tchar.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <vector>
+
 
 // ウィンドウ関連
 LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
