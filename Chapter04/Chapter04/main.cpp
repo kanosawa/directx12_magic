@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <string>
+#include "chapter03.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -14,166 +15,7 @@
 using namespace DirectX;
 
 
-LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	if (msg == WM_DESTROY)
-	{
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
-
-WNDCLASSEX createWindowClass() {
-	WNDCLASSEX windowClass = {};
-	windowClass.cbSize = sizeof(WNDCLASSEX);
-	windowClass.lpfnWndProc = (WNDPROC)WindowProcedure;
-	windowClass.lpszClassName = _T("DX12Sample");
-	windowClass.hInstance = GetModuleHandle(nullptr);
-	RegisterClassEx(&windowClass);
-	return windowClass;
-}
-
-
-HWND createWindowHandle(WNDCLASSEX windowClass, LONG windowWidth, LONG windowHeight) {
-
-	RECT wrc = { 0, 0, windowWidth, windowHeight };
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	auto hwnd = CreateWindow(
-		windowClass.lpszClassName,
-		_T("DX12Sample"),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		wrc.right - wrc.left,
-		wrc.bottom - wrc.top,
-		nullptr,
-		nullptr,
-		windowClass.hInstance,
-		nullptr
-	);
-
-	return hwnd;
-}
-
-
-ID3D12Device* createDevice() {
-	ID3D12Device* dev = nullptr;
-	auto result = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&dev));
-	return dev;
-}
-
-
-IDXGIFactory6* createFactory() {
-	IDXGIFactory6* dxgiFactory = nullptr;
-	auto result = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&dxgiFactory));
-	return dxgiFactory;
-}
-
-
-ID3D12CommandAllocator* createCommandAllocator(ID3D12Device* dev) {
-	ID3D12CommandAllocator* commandAllocator = nullptr;
-	auto result = dev->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-	return commandAllocator;
-}
-
-
-ID3D12GraphicsCommandList* createCommandList(ID3D12Device* dev, ID3D12CommandAllocator* commandAllocator) {
-	ID3D12GraphicsCommandList* commandList = nullptr;
-	auto result = dev->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
-	return commandList;
-}
-
-
-ID3D12CommandQueue* createCommandQueue(ID3D12Device* dev) {
-
-	D3D12_COMMAND_QUEUE_DESC commandQueueDesc = {};
-	commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	commandQueueDesc.NodeMask = 0;
-	commandQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-
-	ID3D12CommandQueue* commandQueue = nullptr;
-	auto result = dev->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
-
-	return commandQueue;
-}
-
-
-IDXGISwapChain4* createSwapChain(HWND hwnd, IDXGIFactory6* dxgiFactory, ID3D12CommandQueue* commandQueue, LONG windowWidth, LONG windowHeight) {
-
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-	swapChainDesc.Width = windowWidth;
-	swapChainDesc.Height = windowHeight;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.Stereo = false;
-	swapChainDesc.SampleDesc.Count = 1;
-	swapChainDesc.SampleDesc.Quality = 0;
-	swapChainDesc.BufferUsage = DXGI_USAGE_BACK_BUFFER;
-	swapChainDesc.BufferCount = 2;
-	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-	IDXGISwapChain4* swapChain = nullptr;
-	auto result = dxgiFactory->CreateSwapChainForHwnd(
-		commandQueue,
-		hwnd,
-		&swapChainDesc,
-		nullptr,
-		nullptr,
-		(IDXGISwapChain1**)&swapChain
-	);
-
-	return swapChain;
-}
-
-
-ID3D12DescriptorHeap* createDescriptorHeap(ID3D12Device* dev) {
-
-	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {};
-	descriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	descriptorHeapDesc.NodeMask = 0;
-	descriptorHeapDesc.NumDescriptors = 2;
-	descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-	ID3D12DescriptorHeap* descriptorHeap = nullptr;
-	auto result = dev->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
-
-	return descriptorHeap;
-}
-
-
-std::vector<ID3D12Resource*> getBufferAndLinkRenderTargetViews(ID3D12Device* dev, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* descriptorHeap) {
-
-	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-	auto result = swapChain->GetDesc(&swapChainDesc);
-
-	std::vector<ID3D12Resource*> backBuffers(swapChainDesc.BufferCount);
-	auto handle = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	for (size_t i = 0; i < swapChainDesc.BufferCount; ++i) {
-		result = swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffers[i]));
-		dev->CreateRenderTargetView(backBuffers[i], nullptr, handle);
-		handle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	}
-
-	return backBuffers;
-}
-
-
-D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
-	D3D12_RESOURCE_BARRIER resourceBarrier = {};
-	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	resourceBarrier.Transition.pResource = backBuffer;
-	resourceBarrier.Transition.Subresource = 0;
-	return resourceBarrier;
-}
-
-
+// ヒーププロパティを作成（頂点座標とインデックス用）
 D3D12_HEAP_PROPERTIES createHeapProperties() {
 	D3D12_HEAP_PROPERTIES heapProperties = {};
 	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -183,10 +25,11 @@ D3D12_HEAP_PROPERTIES createHeapProperties() {
 }
 
 
-D3D12_RESOURCE_DESC createResourceDescriptor(int verticesSize) {
+// リソースディスクリプタを作成（頂点座標とインデックス用）
+D3D12_RESOURCE_DESC createResourceDescriptor(UINT64 dataSize) {
 	D3D12_RESOURCE_DESC resourceDescriptor = {};
 	resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDescriptor.Width = verticesSize;
+	resourceDescriptor.Width = dataSize;
 	resourceDescriptor.Height = 1;
 	resourceDescriptor.DepthOrArraySize = 1;
 	resourceDescriptor.MipLevels = 1;
@@ -197,12 +40,14 @@ D3D12_RESOURCE_DESC createResourceDescriptor(int verticesSize) {
 	return resourceDescriptor;
 }
 
-ID3D12Resource* createVertexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES heapProperties, D3D12_RESOURCE_DESC resourceDescriptor) {
+
+// 頂点バッファーを作成
+ID3D12Resource* createVertexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES vertexHeapProperties, D3D12_RESOURCE_DESC vertexResourceDescriptor) {
 	ID3D12Resource* vertexBuffer = nullptr;
 	auto result = dev->CreateCommittedResource(
-		&heapProperties,
+		&vertexHeapProperties,
 		D3D12_HEAP_FLAG_NONE,
-		&resourceDescriptor,
+		&vertexResourceDescriptor,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&vertexBuffer)
@@ -210,6 +55,8 @@ ID3D12Resource* createVertexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES heap
 	return vertexBuffer;
 }
 
+
+// 頂点座標情報をマップ
 void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertices) {
 	XMFLOAT3* vertexBufferMap = nullptr;
 	auto result = vertexBuffer->Map(0, nullptr, (void**)&vertexBufferMap);
@@ -217,6 +64,8 @@ void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertice
 	vertexBuffer->Unmap(0, nullptr);
 }
 
+
+// 頂点バッファビューを作成
 D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertices) {
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
@@ -225,21 +74,22 @@ D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, st
 	return vertexBufferView;
 }
 
-ID3D12Resource* createIndexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES heapProperties, D3D12_RESOURCE_DESC resourceDescriptor, int indexSize) {
+
+// インデックスバッファーを作成
+ID3D12Resource* createIndexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES indexHeapProperties, D3D12_RESOURCE_DESC indexResourceDescriptor) {
 	ID3D12Resource* indexBuffer = nullptr;
-	//設定は、バッファのサイズ以外頂点バッファの設定を使いまわして
-	//OKだと思います。
-	resourceDescriptor.Width = indexSize;
 	auto result = dev->CreateCommittedResource(
-		&heapProperties,
+		&indexHeapProperties,
 		D3D12_HEAP_FLAG_NONE,
-		&resourceDescriptor,
+		&indexResourceDescriptor,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&indexBuffer));
 	return indexBuffer;
 }
 
+
+// インデックス情報をマップ
 void mapIndexBuffer(ID3D12Resource* indexBuffer, std::vector<unsigned short> indices) {
 	unsigned short* indexBufferMap = nullptr;
 	auto result = indexBuffer->Map(0, nullptr, (void**)&indexBufferMap);
@@ -247,6 +97,8 @@ void mapIndexBuffer(ID3D12Resource* indexBuffer, std::vector<unsigned short> ind
 	indexBuffer->Unmap(0, nullptr);
 }
 
+
+// インデックスバッファビューを作成
 D3D12_INDEX_BUFFER_VIEW createIndexBufferView(ID3D12Resource* indexBuffer, std::vector<unsigned short> indices) {
 	D3D12_INDEX_BUFFER_VIEW indexBufferView = {};
 	indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
@@ -255,6 +107,8 @@ D3D12_INDEX_BUFFER_VIEW createIndexBufferView(ID3D12Resource* indexBuffer, std::
 	return indexBufferView;
 }
 
+
+// 頂点シェーダーオブジェクトを作成
 ID3DBlob* createVertexShaderBlob() {
 	ID3DBlob* vertexShaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
@@ -270,6 +124,8 @@ ID3DBlob* createVertexShaderBlob() {
 	return vertexShaderBlob;
 }
 
+
+// ピクセルシェーダーオブジェクトを作成
 ID3DBlob* createPixelShaderBlob() {
 	ID3DBlob* pixelShaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
@@ -285,6 +141,9 @@ ID3DBlob* createPixelShaderBlob() {
 	return pixelShaderBlob;
 }
 
+
+// ルートシグネチャを作成（頂点情報以外のデータをシェーダーに送るための仕組み）
+// Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor = {};
@@ -311,8 +170,22 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 	return rootSignature;
 }
 
+
+// グラフィックスパイプラインステートを作成
 ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature) {
 
+	// レンダーターゲットブレンドディスクリプタ
+	D3D12_RENDER_TARGET_BLEND_DESC renderTargetBlendDescriptor = {};
+	renderTargetBlendDescriptor.BlendEnable = false;
+	renderTargetBlendDescriptor.LogicOpEnable = false;
+	renderTargetBlendDescriptor.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	// インプットレイアウト
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+
+	// グラフィックスパイプラインステートディスクリプタ
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gPipelineStateDescriptor = {};
 	gPipelineStateDescriptor.pRootSignature = nullptr;
 	gPipelineStateDescriptor.VS.pShaderBytecode = vertexShaderBlob->GetBufferPointer();
@@ -326,26 +199,15 @@ ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* ve
 	gPipelineStateDescriptor.RasterizerState.DepthClipEnable = true;
 	gPipelineStateDescriptor.BlendState.AlphaToCoverageEnable = false;
 	gPipelineStateDescriptor.BlendState.IndependentBlendEnable = false;
-
-	D3D12_RENDER_TARGET_BLEND_DESC renderTargetBlendDescriptor = {};
-	renderTargetBlendDescriptor.BlendEnable = false;
-	renderTargetBlendDescriptor.LogicOpEnable = false;
-	renderTargetBlendDescriptor.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	gPipelineStateDescriptor.BlendState.RenderTarget[0] = renderTargetBlendDescriptor;
-
-	D3D12_INPUT_ELEMENT_DESC inputElementDescriptor[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
-	gPipelineStateDescriptor.InputLayout.pInputElementDescs = inputElementDescriptor;
-	gPipelineStateDescriptor.InputLayout.NumElements = _countof(inputElementDescriptor);
-
+	gPipelineStateDescriptor.InputLayout.pInputElementDescs = inputLayout;
+	gPipelineStateDescriptor.InputLayout.NumElements = _countof(inputLayout);
 	gPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 	gPipelineStateDescriptor.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	gPipelineStateDescriptor.NumRenderTargets = 1;
 	gPipelineStateDescriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	gPipelineStateDescriptor.SampleDesc.Count = 1;
 	gPipelineStateDescriptor.SampleDesc.Quality = 0;
-
 	gPipelineStateDescriptor.pRootSignature = rootSignature;
 
 	ID3D12PipelineState* pipelineState = nullptr;
@@ -354,6 +216,8 @@ ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* ve
 	return pipelineState;
 }
 
+
+// ビューポートを作成
 D3D12_VIEWPORT createViewPort(int windowWidth, int windowHeight) {
 	D3D12_VIEWPORT viewport = {};
 	viewport.Width = windowWidth;
@@ -365,6 +229,8 @@ D3D12_VIEWPORT createViewPort(int windowWidth, int windowHeight) {
 	return viewport;
 }
 
+
+// シザー矩形を作成
 D3D12_RECT createScissorRect(int windowWidth, int windowHeight) {
 	D3D12_RECT scissorRect = {};
 	scissorRect.left = 0;
@@ -375,6 +241,48 @@ D3D12_RECT createScissorRect(int windowWidth, int windowHeight) {
 }
 
 
+// レンダリング処理（のコマンドリストへの登録）
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect) {
+
+	// バリアを設定
+	ID3D12Resource* backBuffer;
+	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
+	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
+	auto resourceBarrier = createResourceBarrier(backBuffer);
+
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+
+	// パイプラインステートをセット
+	commandList->SetPipelineState(pipelineState);
+
+	// これから使うレンダーターゲットビューとしてrtvHandleをセット
+	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
+
+	// クリア
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	// レンダリング設定
+	commandList->RSSetViewports(1, &viewport);
+	commandList->RSSetScissorRects(1, &scissorRect);
+	commandList->SetGraphicsRootSignature(rootSignature);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetIndexBuffer(&indexBufferView);
+
+	// レンダリング
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+	// バリアによる完了待ち
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+}
+
 
 int main() {
 
@@ -382,14 +290,14 @@ int main() {
 	const unsigned int windowHeight = 720;
 
 	std::vector<XMFLOAT3> vertices = {
-		{-0.4f,-0.7f,0.0f} ,//左下
-		{-0.4f,0.7f,0.0f} ,//左上
-		{0.4f,-0.7f,0.0f} ,//右下
-		{0.4f,0.7f,0.0f} ,//右上
+		{-0.4f, -0.7f, 0.0f} , // 左下
+		{-0.4f, 0.7f,  0.0f} , // 左上
+		{0.4f,  -0.7f, 0.0f} , // 右下
+		{0.4f,  0.7f,  0.0f} , // 右上
 	};
-
 	std::vector<unsigned short> indices = { 0,1,2, 2,1,3 };
 
+	// Chapter03
 	auto windowClass = createWindowClass();
 	auto hwnd = createWindowHandle(windowClass, windowWidth, windowHeight);
 	auto dev = createDevice();
@@ -398,33 +306,38 @@ int main() {
 	auto commandList = createCommandList(dev, commandAllocator);
 	auto commandQueue = createCommandQueue(dev);
 	auto swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
-	auto descriptorHeap = createDescriptorHeap(dev);
-	auto backBuffers = getBufferAndLinkRenderTargetViews(dev, swapChain, descriptorHeap);
-
-	auto heapProperties = createHeapProperties();
-	auto resourceDescriptor = createResourceDescriptor(sizeof(vertices[0]) * vertices.size());
-	auto vertexBuffer = createVertexBuffer(dev, heapProperties, resourceDescriptor);
+	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
+	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
+	
+	// 頂点座標
+	auto vertexHeapProperties = createHeapProperties();
+	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
+	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
 	mapVertexBuffer(vertexBuffer, vertices);
 	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
-	auto indexBuffer = createIndexBuffer(dev, heapProperties, resourceDescriptor, sizeof(indices[0]) * indices.size());
+
+	// インデックス
+	auto indexHeapProperties = createHeapProperties();
+	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
+	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
+
+	// シェーダー
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
+
+	// パイプライン
 	auto rootSignature = createRootSignature(dev);
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature);
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-
-	ID3D12Fence* fence = nullptr;
-	UINT64 fenceVal = 0;
-	auto result = dev->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-
+	auto fence = createFence(dev);
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg = {};
-
+	UINT64 fenceVal = 0;
 	while (true)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -433,48 +346,18 @@ int main() {
 		}
 		if (msg.message == WM_QUIT) break;
 
-		auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
-		auto resourceBarrier = createResourceBarrier(backBuffers[bufferIdx]);
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
-		commandList->SetPipelineState(pipelineState);
-
-		auto rtvHandle = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
-
-		float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
-		commandList->SetGraphicsRootSignature(rootSignature);
-
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-
-		commandList->IASetIndexBuffer(&indexBufferView);
-		commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
+		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect);
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };
 		commandQueue->ExecuteCommandLists(1, constCommandList);
 
+		// レンダリング完了待ち
 		commandQueue->Signal(fence, ++fenceVal);
-		if (fence->GetCompletedValue() != fenceVal)
-		{
-			auto event = CreateEvent(nullptr, false, false, nullptr);
-			fence->SetEventOnCompletion(fenceVal, event);
-			WaitForSingleObject(event, INFINITE);
-			CloseHandle(event);
-		}
+		auto event = CreateEvent(nullptr, false, false, nullptr);
+		fence->SetEventOnCompletion(fenceVal, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
 
 		commandAllocator->Reset();
 		commandList->Reset(commandAllocator, nullptr);
