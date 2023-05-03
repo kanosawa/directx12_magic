@@ -23,3 +23,6 @@ ID3D12DescriptorHeap* createBasicDescriptorHeap(ID3D12Device* dev, UINT64 numDes
 
 // 定数バッファビューを作成
 void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID3D12DescriptorHeap* basicDescriptorHeap);
+
+// ルートシグネチャを作成
+ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
