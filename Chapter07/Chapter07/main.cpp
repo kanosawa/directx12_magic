@@ -10,6 +10,7 @@
 #include <d3dx12.h>
 #include "chapter03.h"
 #include "chapter04.h"
+#include "chapter05.h"
 #include "chapter07.h"
 
 using namespace DirectX;
@@ -100,65 +101,6 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 }
 
 
-D3D12_HEAP_PROPERTIES createTexHeapProperties() {
-	D3D12_HEAP_PROPERTIES texHeapProperties = {};
-	texHeapProperties.Type = D3D12_HEAP_TYPE_CUSTOM;
-	texHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-	texHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-	texHeapProperties.CreationNodeMask = 0;
-	texHeapProperties.VisibleNodeMask = 0;
-	return texHeapProperties;
-}
-
-
-D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata) {
-	D3D12_RESOURCE_DESC texResourceDesc = {};
-	texResourceDesc.Format = metadata.format;
-	texResourceDesc.Width = metadata.width;
-	texResourceDesc.Height = metadata.height;
-	texResourceDesc.DepthOrArraySize = metadata.arraySize;
-	texResourceDesc.SampleDesc.Count = 1;
-	texResourceDesc.SampleDesc.Quality = 0;
-	texResourceDesc.MipLevels = metadata.mipLevels;
-	texResourceDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
-	texResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	texResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-	return texResourceDesc;
-}
-
-
-ID3D12Resource* createTexBuffer(ID3D12Device* dev, const DirectX::Image* img, TexMetadata metadata) {
-
-	auto texHeapProperties = createTexHeapProperties();
-	auto texResourceDesc = createTexResourceDescriptor(metadata);
-
-	ID3D12Resource* texBuffer = nullptr;
-	auto result = dev->CreateCommittedResource(
-		&texHeapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&texResourceDesc,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		nullptr,
-		IID_PPV_ARGS(&texBuffer)
-	);
-
-	result = texBuffer->WriteToSubresource(0, nullptr, img->pixels, img->rowPitch, img->slicePitch);
-	return texBuffer;
-}
-
-
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, DXGI_FORMAT dgxiFormat, D3D12_CPU_DESCRIPTOR_HANDLE heapHandle) {
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
-	shaderResourceViewDesc.Format = dgxiFormat;
-	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	dev->CreateShaderResourceView(texBuffer, &shaderResourceViewDesc, heapHandle);
-}
-
-
 ID3D12DescriptorHeap* createDescriptorHeapAndViewsForSRV_CBV(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12Resource* constBuffer, DXGI_FORMAT dgxiFormat) {
 
 	ID3D12DescriptorHeap* descHeap = nullptr;
@@ -170,7 +112,7 @@ ID3D12DescriptorHeap* createDescriptorHeapAndViewsForSRV_CBV(ID3D12Device* dev, 
 	auto result = dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descHeap));
 
 	auto heapHandle = descHeap->GetCPUDescriptorHandleForHeapStart();
-	createShaderResourceView(dev, texBuffer, dgxiFormat, heapHandle);
+	createShaderResourceView(dev, texBuffer, descHeap, dgxiFormat);
 	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDesc = {};
@@ -235,30 +177,6 @@ ID3D12DescriptorHeap* createDepthDescriptorHeapAndView(ID3D12Device* dev, ID3D12
 }
 
 
-D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
-	D3D12_RESOURCE_BARRIER resourceBarrier = {};
-	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	resourceBarrier.Transition.pResource = backBuffer;
-	resourceBarrier.Transition.Subresource = 0;
-	return resourceBarrier;
-}
-
-
-std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
-	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "BONE_NO", 0, DXGI_FORMAT_R16G16_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "WEIGHT", 0, DXGI_FORMAT_R8_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "EDGE_FLG", 0, DXGI_FORMAT_R8_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-	};
-	return inputLayout;
-}
-
-
-
 void main() {
 
 	auto fp = fopen("Model/èââπÉ~ÉN.pmd", "rb");
@@ -319,12 +237,17 @@ void main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
+	// Chapter05
 	TexMetadata metadata = {};
 	ScratchImage scratchImg = {};
 	result = LoadFromWICFile(L"textest.png", WIC_FLAGS_NONE, &metadata, scratchImg);
 	auto img = scratchImg.GetImage(0, 0, 0);
+	auto texHeapProperties = createTexHeapProperties();
+	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
+	auto basicDescriptorHeap = createTexDescriptorHeap(dev);
+	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, metadata.format);
 
-	auto texBuffer = createTexBuffer(dev, img, metadata);
+	
 	auto constBuffer = createConstBuffer(dev);
 
 	auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);

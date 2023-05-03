@@ -15,3 +15,6 @@ void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<unsigned char> ve
 
 // 頂点バッファビューを作成（PMDファイル版）
 D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<unsigned char> vertices, size_t pmdvertex_size);
+
+// インプットレイアウトを作成（PMDファイル版）
+std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
