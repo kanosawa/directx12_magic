@@ -148,6 +148,9 @@ ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* ve
 	gPipelineStateDescriptor.RasterizerState.DepthClipEnable = true;
 	gPipelineStateDescriptor.BlendState.AlphaToCoverageEnable = false;
 	gPipelineStateDescriptor.BlendState.IndependentBlendEnable = false;
+	gPipelineStateDescriptor.DepthStencilState.DepthEnable = true;
+	gPipelineStateDescriptor.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	gPipelineStateDescriptor.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 	gPipelineStateDescriptor.BlendState.RenderTarget[0] = renderTargetBlendDescriptor;
 	gPipelineStateDescriptor.InputLayout.pInputElementDescs = &inputLayout[0];
 	gPipelineStateDescriptor.InputLayout.NumElements = inputLayout.size();

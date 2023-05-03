@@ -68,7 +68,7 @@ ID3D12Resource* createIndexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES index
 	return indexBuffer;
 }
 
-
+/*
 void mapIndexBuffer(ID3D12Resource* indexBuffer, std::vector<unsigned short> indices) {
 	unsigned short* indexBufferMap = nullptr;
 	auto result = indexBuffer->Map(0, nullptr, (void**)&indexBufferMap);
@@ -84,7 +84,7 @@ D3D12_INDEX_BUFFER_VIEW createIndexBufferView(ID3D12Resource* indexBuffer, std::
 	indexBufferView.SizeInBytes = sizeof(indices);
 	return indexBufferView;
 }
-
+*/
 
 ID3DBlob* createVertexShaderBlob() {
 	ID3DBlob* vertexShaderBlob = nullptr;
