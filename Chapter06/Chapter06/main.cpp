@@ -129,7 +129,7 @@ void main() {
 	auto img = scratchImg.GetImage(0, 0, 0);
 	auto texHeapProperties = createTexHeapProperties();
 	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
-	auto basicDescriptorHeap = createTexDescriptorHeap(dev);
+	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
 	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, metadata.format);
 
 	// 定数バッファ

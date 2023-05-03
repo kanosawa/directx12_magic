@@ -118,12 +118,14 @@ ID3DBlob* createPixelShaderBlob() {
 }
 
 
+/*
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	return inputLayout;
 }
+*/
 
 
 ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature, std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout) {
