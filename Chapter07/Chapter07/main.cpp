@@ -451,18 +451,6 @@ void main() {
 	const unsigned int windowWidth = 1280;
 	const unsigned int windowHeight = 720;
 
-	/*
-	auto windowClass = createWindowClass();
-	auto hwnd = createWindowHandle(windowClass, windowWidth, windowHeight);
-	auto dev = createDevice();
-	auto dxgiFactory = createFactory();
-	auto commandAllocator = createCommandAllocator(dev);
-	auto commandList = createCommandList(dev, commandAllocator);
-	auto commandQueue = createCommandQueue(dev);
-	auto swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
-	auto descriptorHeap = createDescriptorHeap(dev);
-	auto backBuffers = getBufferAndLinkRenderTargetViews(dev, swapChain, descriptorHeap);
-	*/
 	// Chapter03
 	auto windowClass = createWindowClass();
 	auto hwnd = createWindowHandle(windowClass, windowWidth, windowHeight);
