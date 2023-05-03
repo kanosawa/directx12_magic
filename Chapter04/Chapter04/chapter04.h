@@ -41,10 +41,6 @@ ID3DBlob* createVertexShaderBlob();
 // ピクセルシェーダーオブジェクトを作成
 ID3DBlob* createPixelShaderBlob();
 
-// ルートシグネチャを作成（頂点情報以外のデータをシェーダーに送るための仕組み）
-// Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
-ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
-
 // インプットレイアウトを作成
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
 

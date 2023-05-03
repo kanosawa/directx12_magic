@@ -6,6 +6,35 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 
+// ルートシグネチャを作成（頂点情報以外のデータをシェーダーに送るための仕組み）
+// Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
+ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
+
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor = {};
+	rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	ID3DBlob* rootSignatureBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	auto result = D3D12SerializeRootSignature(
+		&rootSignatureDescriptor,
+		D3D_ROOT_SIGNATURE_VERSION_1_0,
+		&rootSignatureBlob,
+		&errorBlob
+	);
+
+	ID3D12RootSignature* rootSignature = nullptr;
+	result = dev->CreateRootSignature(
+		0,
+		rootSignatureBlob->GetBufferPointer(),
+		rootSignatureBlob->GetBufferSize(),
+		IID_PPV_ARGS(&rootSignature)
+	);
+	rootSignatureBlob->Release();
+
+	return rootSignature;
+}
+
+
 // レンダリング処理（のコマンドリストへの登録）
 void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect) {
 

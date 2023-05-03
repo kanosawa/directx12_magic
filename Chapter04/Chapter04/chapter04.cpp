@@ -118,33 +118,6 @@ ID3DBlob* createPixelShaderBlob() {
 }
 
 
-ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
-
-	D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor = {};
-	rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	ID3DBlob* rootSignatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	auto result = D3D12SerializeRootSignature(
-		&rootSignatureDescriptor,
-		D3D_ROOT_SIGNATURE_VERSION_1_0,
-		&rootSignatureBlob,
-		&errorBlob
-	);
-
-	ID3D12RootSignature* rootSignature = nullptr;
-	result = dev->CreateRootSignature(
-		0,
-		rootSignatureBlob->GetBufferPointer(),
-		rootSignatureBlob->GetBufferSize(),
-		IID_PPV_ARGS(&rootSignature)
-	);
-	rootSignatureBlob->Release();
-
-	return rootSignature;
-}
-
-
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
