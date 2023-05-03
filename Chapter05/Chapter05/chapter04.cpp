@@ -118,47 +118,22 @@ ID3DBlob* createPixelShaderBlob() {
 }
 
 
-/*
-ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
-
-	D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor = {};
-	rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	ID3DBlob* rootSignatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	auto result = D3D12SerializeRootSignature(
-		&rootSignatureDescriptor,
-		D3D_ROOT_SIGNATURE_VERSION_1_0,
-		&rootSignatureBlob,
-		&errorBlob
-	);
-
-	ID3D12RootSignature* rootSignature = nullptr;
-	result = dev->CreateRootSignature(
-		0,
-		rootSignatureBlob->GetBufferPointer(),
-		rootSignatureBlob->GetBufferSize(),
-		IID_PPV_ARGS(&rootSignature)
-	);
-	rootSignatureBlob->Release();
-
-	return rootSignature;
+std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
+	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+	return inputLayout;
 }
-*/
 
-/*
-ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature) {
+
+ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature, std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout) {
 
 	// レンダーターゲットブレンドディスクリプタ
 	D3D12_RENDER_TARGET_BLEND_DESC renderTargetBlendDescriptor = {};
 	renderTargetBlendDescriptor.BlendEnable = false;
 	renderTargetBlendDescriptor.LogicOpEnable = false;
 	renderTargetBlendDescriptor.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	// インプットレイアウト
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
 
 	// グラフィックスパイプラインステートディスクリプタ
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gPipelineStateDescriptor = {};
@@ -175,8 +150,8 @@ ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* ve
 	gPipelineStateDescriptor.BlendState.AlphaToCoverageEnable = false;
 	gPipelineStateDescriptor.BlendState.IndependentBlendEnable = false;
 	gPipelineStateDescriptor.BlendState.RenderTarget[0] = renderTargetBlendDescriptor;
-	gPipelineStateDescriptor.InputLayout.pInputElementDescs = inputLayout;
-	gPipelineStateDescriptor.InputLayout.NumElements = _countof(inputLayout);
+	gPipelineStateDescriptor.InputLayout.pInputElementDescs = &inputLayout[0];
+	gPipelineStateDescriptor.InputLayout.NumElements = inputLayout.size();
 	gPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 	gPipelineStateDescriptor.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	gPipelineStateDescriptor.NumRenderTargets = 1;
@@ -190,7 +165,7 @@ ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* ve
 
 	return pipelineState;
 }
-*/
+
 
 
 D3D12_VIEWPORT createViewPort(int windowWidth, int windowHeight) {
