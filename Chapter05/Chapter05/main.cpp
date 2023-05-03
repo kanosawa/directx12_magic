@@ -1,26 +1,12 @@
-#include <Windows.h>
-#include <tchar.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <d3dcompiler.h>
-#include <DirectXMath.h>
-#include <vector>
-#include <string>
-#include <DirectXTex.h>
 #include "chapter03.h"
 #include "chapter04.h"
+#include "chapter05.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "DirectXTex.lib")
 
-using namespace DirectX;
-
-struct Vertex {
-	XMFLOAT3 pos;
-	XMFLOAT2 uv;
-};
 
 struct TexRGBA {
 	unsigned char R, G, B, A;
@@ -29,18 +15,21 @@ struct TexRGBA {
 
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
+	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
 	D3D12_DESCRIPTOR_RANGE descTableRange = {};
 	descTableRange.NumDescriptors = 1;
 	descTableRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descTableRange.BaseShaderRegister = 0;
 	descTableRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	// ルートパラメーター（ディスクリプタテーブルの実体。ディスクリプタテーブルはテクスチャなどをCPU/GPUで共通認識するための仕組み）
 	D3D12_ROOT_PARAMETER rootParam = {};
 	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParam.DescriptorTable.pDescriptorRanges = &descTableRange;
 	rootParam.DescriptorTable.NumDescriptorRanges = 1;
 
+	// サンプラー（uv値によってテクスチャデータからどう色を取り出すかを決めるための設定）
 	D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -81,94 +70,6 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 }
 
 
-
-D3D12_HEAP_PROPERTIES createTexHeapProperties() {
-	D3D12_HEAP_PROPERTIES texHeapProperties = {};
-	texHeapProperties.Type = D3D12_HEAP_TYPE_CUSTOM;
-	texHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-	texHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-	texHeapProperties.CreationNodeMask = 0;
-	texHeapProperties.VisibleNodeMask = 0;
-	return texHeapProperties;
-}
-
-
-D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata) {
-	D3D12_RESOURCE_DESC texResourceDesc = {};
-	texResourceDesc.Format = metadata.format;
-	texResourceDesc.Width = metadata.width;
-	texResourceDesc.Height = metadata.height;
-	texResourceDesc.DepthOrArraySize = metadata.arraySize;
-	texResourceDesc.SampleDesc.Count = 1;
-	texResourceDesc.SampleDesc.Quality = 0;
-	texResourceDesc.MipLevels = metadata.mipLevels;
-	texResourceDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
-	texResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	texResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-	return texResourceDesc;
-}
-
-
-ID3D12Resource* createTexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES texHeapProperties, const DirectX::Image* img, TexMetadata metadata) {
-
-	auto texResourceDesc = createTexResourceDescriptor(metadata);
-
-	ID3D12Resource* texBuffer = nullptr;
-	auto result = dev->CreateCommittedResource(
-		&texHeapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&texResourceDesc,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		nullptr,
-		IID_PPV_ARGS(&texBuffer)
-	);
-
-	result = texBuffer->WriteToSubresource(0, nullptr, img->pixels, img->rowPitch, img->slicePitch);
-	return texBuffer;
-}
-
-
-ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev) {
-	ID3D12DescriptorHeap* texDescHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC texDescHeapDesc = {};
-	texDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	texDescHeapDesc.NodeMask = 0;
-	texDescHeapDesc.NumDescriptors = 1;
-	texDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	auto result = dev->CreateDescriptorHeap(&texDescHeapDesc, IID_PPV_ARGS(&texDescHeap));
-	return texDescHeap;
-}
-
-
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, DXGI_FORMAT format) {
-	
-	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
-	shaderResourceViewDesc.Format = format;
-	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	dev->CreateShaderResourceView(texBuffer, &shaderResourceViewDesc, texDescHeap->GetCPUDescriptorHandleForHeapStart());
-}
-
-
-void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices) {
-	Vertex* vertexBufferMap = nullptr;
-	auto result = vertexBuffer->Map(0, nullptr, (void**)&vertexBufferMap);
-	std::copy(std::begin(vertices), std::end(vertices), vertexBufferMap);
-	vertexBuffer->Unmap(0, nullptr);
-}
-
-
-D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices) {
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
-	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-	vertexBufferView.SizeInBytes = sizeof(vertices[0]) * vertices.size();
-	vertexBufferView.StrideInBytes = sizeof(vertices[0]);
-	return vertexBufferView;
-}
-
-
 // レンダリング処理（のコマンドリストへの登録）
 void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
@@ -196,7 +97,7 @@ void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12Gr
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-	// レンダリング設定
+	// レンダリング設定（Chapter04まで）
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
 	commandList->SetGraphicsRootSignature(rootSignature);
@@ -204,6 +105,7 @@ void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12Gr
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 	commandList->IASetIndexBuffer(&indexBufferView);
 
+	// レンダリング設定（Chapter05で追加）
 	commandList->SetDescriptorHeaps(1, &texDescHeap);
 	commandList->SetGraphicsRootDescriptorTable(0, texDescHeap->GetGPUDescriptorHandleForHeapStart());
 
@@ -272,15 +174,15 @@ int main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	auto texHeapProperties = createTexHeapProperties();
+	// テクスチャ設定
 	TexMetadata metadata = {};
 	ScratchImage scratchImg = {};
 	result = LoadFromWICFile(L"textest.png", WIC_FLAGS_NONE, &metadata, scratchImg);
 	auto img = scratchImg.GetImage(0, 0, 0);
-
+	auto texHeapProperties = createTexHeapProperties();
 	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
-	auto texDescHeap = createTexDescriptorHeap(dev);
-	createShaderResourceView(dev, texBuffer, texDescHeap, metadata.format);
+	auto texDescriptorHeap = createTexDescriptorHeap(dev);
+	createShaderResourceView(dev, texBuffer, texDescriptorHeap, metadata.format);
 
 	auto fence = createFence(dev);
 	ShowWindow(hwnd, SW_SHOW);
@@ -295,7 +197,7 @@ int main() {
 		}
 		if (msg.message == WM_QUIT) break;
 
-		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, texDescHeap);
+		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, texDescriptorHeap);
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };

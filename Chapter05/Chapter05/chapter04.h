@@ -42,7 +42,8 @@ ID3DBlob* createVertexShaderBlob();
 ID3DBlob* createPixelShaderBlob();
 
 // インプットレイアウトを作成
-std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
+// ※chapter05で再定義
+// std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
 
 // グラフィックスパイプラインステートを作成
 ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature, std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout);
