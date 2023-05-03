@@ -11,6 +11,7 @@
 #include "chapter03.h"
 #include "chapter04.h"
 #include "chapter05.h"
+#include "chapter06.h"
 #include "chapter07.h"
 
 using namespace DirectX;
@@ -34,11 +35,6 @@ struct PMDVertex {
 	unsigned short boneNo[2];
 	unsigned char boneWeight;
 	unsigned char edgeFlg;
-};
-
-struct MatricesData {
-	XMMATRIX world;
-	XMMATRIX viewproj;
 };
 
 
@@ -98,82 +94,6 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 	rootSignatureBlob->Release();
 
 	return rootSignature;
-}
-
-
-ID3D12DescriptorHeap* createDescriptorHeapAndViewsForSRV_CBV(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12Resource* constBuffer, DXGI_FORMAT dgxiFormat) {
-
-	ID3D12DescriptorHeap* descHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0;
-	descHeapDesc.NumDescriptors = 2;
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	auto result = dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descHeap));
-
-	auto heapHandle = descHeap->GetCPUDescriptorHandleForHeapStart();
-	createShaderResourceView(dev, texBuffer, descHeap, dgxiFormat);
-	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDesc = {};
-	constantBufferViewDesc.BufferLocation = constBuffer->GetGPUVirtualAddress();
-	constantBufferViewDesc.SizeInBytes = static_cast<UINT>(constBuffer->GetDesc().Width);
-	dev->CreateConstantBufferView(&constantBufferViewDesc, heapHandle);
-
-	return descHeap;
-}
-
-
-ID3D12Resource* createConstBuffer(ID3D12Device* dev) {
-	ID3D12Resource* constBuffer = nullptr;
-	auto constHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	auto constResourceDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(MatricesData) + 0xff) & ~0xff);
-	auto result = dev->CreateCommittedResource(&constHeapProperties, D3D12_HEAP_FLAG_NONE, &constResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&constBuffer));
-	return constBuffer;
-}
-
-
-ID3D12Resource* createDepthBuffer(ID3D12Device* dev, int windowWidth, int windowHeight) {
-	D3D12_RESOURCE_DESC depthResDesc = {};
-	depthResDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	depthResDesc.Width = windowWidth;
-	depthResDesc.Height = windowHeight;
-	depthResDesc.DepthOrArraySize = 1;
-	depthResDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	depthResDesc.SampleDesc.Count = 1;
-	depthResDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-	D3D12_HEAP_PROPERTIES depthHeapProp = {};
-	depthHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-	depthHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	depthHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-
-	D3D12_CLEAR_VALUE depthClearValue = {};
-	depthClearValue.DepthStencil.Depth = 1.0f;
-	depthClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-
-	ID3D12Resource* depthBuffer = nullptr;
-	auto result = dev->CreateCommittedResource(&depthHeapProp, D3D12_HEAP_FLAG_NONE, &depthResDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &depthClearValue, IID_PPV_ARGS(&depthBuffer));
-
-	return depthBuffer;
-}
-
-
-ID3D12DescriptorHeap* createDepthDescriptorHeapAndView(ID3D12Device* dev, ID3D12Resource* depthBuffer) {
-
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1;
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	ID3D12DescriptorHeap* dsvHeap = nullptr;
-	auto result = dev->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-	dev->CreateDepthStencilView(depthBuffer, &dsvDesc, dsvHeap->GetCPUDescriptorHandleForHeapStart());
-
-	return dsvHeap;
 }
 
 
@@ -237,20 +157,15 @@ void main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// Chapter05
-	TexMetadata metadata = {};
-	ScratchImage scratchImg = {};
-	result = LoadFromWICFile(L"textest.png", WIC_FLAGS_NONE, &metadata, scratchImg);
-	auto img = scratchImg.GetImage(0, 0, 0);
-	auto texHeapProperties = createTexHeapProperties();
-	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
-	auto basicDescriptorHeap = createTexDescriptorHeap(dev);
-	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, metadata.format);
-
-	
+	// Chapter05, 06（テクスチャ関連は削除）
+	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 1); // テクスチャがないのでnumDescriptorsは1
 	auto constBuffer = createConstBuffer(dev);
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap);
 
-	auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	// デプスバッファ
+	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
+	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
+	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);
 	
 	auto worldMat = XMMatrixRotationY(XM_PIDIV4);
 	XMFLOAT3 eye(0, 10, -15);
@@ -258,25 +173,16 @@ void main() {
 	XMFLOAT3 up(0, 1, 0);
 	auto viewMat = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 	auto projMat = XMMatrixPerspectiveFovLH(XM_PIDIV2, static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 1.0f, 100.0f);
-
 	MatricesData* mapMatrix;
 	result = constBuffer->Map(0, nullptr, (void**)&mapMatrix);
 	mapMatrix->world = worldMat;
 	mapMatrix->viewproj = viewMat * projMat;
 
-	auto descHeapForSRV_CBV = createDescriptorHeapAndViewsForSRV_CBV(dev, texBuffer, constBuffer, metadata.format);
-
-	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
-	auto dsvHeap = createDepthDescriptorHeapAndView(dev, depthBuffer);
-
-	ID3D12Fence* fence = nullptr;
-	UINT64 fenceVal = 0;
-	result = dev->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-
+	auto fence = createFence(dev);
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg = {};
-
+	UINT64 fenceVal = 0;
 	float angle = 0.0f;
 	while (true)
 	{
@@ -302,7 +208,7 @@ void main() {
 		auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-		auto dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		auto dsvHandle = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
@@ -312,9 +218,9 @@ void main() {
 		commandList->RSSetViewports(1, &viewport);
 		commandList->RSSetScissorRects(1, &scissorRect);
 		commandList->SetGraphicsRootSignature(rootSignature);
-		commandList->SetDescriptorHeaps(1, &descHeapForSRV_CBV);
+		commandList->SetDescriptorHeaps(1, &basicDescriptorHeap);
 
-		auto heapHandle = descHeapForSRV_CBV->GetGPUDescriptorHandleForHeapStart();
+		auto heapHandle = basicDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 		commandList->SetGraphicsRootDescriptorTable(0, heapHandle);
 
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
