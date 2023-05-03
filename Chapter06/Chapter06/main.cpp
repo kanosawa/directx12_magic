@@ -1,8 +1,7 @@
-#include <d3dx12.h>
 #include "chapter03.h"
 #include "chapter04.h"
 #include "chapter05.h"
-
+#include "chapter06.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -16,6 +15,7 @@ struct TexRGBA {
 
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
+	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
 	D3D12_DESCRIPTOR_RANGE descTableRange[2] = {};
 	descTableRange[0].NumDescriptors = 1;
 	descTableRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -27,12 +27,14 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 	descTableRange[1].BaseShaderRegister = 0;
 	descTableRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	// ルートパラメーター（ディスクリプタテーブルの実体。ディスクリプタテーブルはテクスチャなどをCPU/GPUで共通認識するための仕組み）
 	D3D12_ROOT_PARAMETER rootParam = {};
 	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParam.DescriptorTable.pDescriptorRanges = &descTableRange[0];
-	rootParam.DescriptorTable.NumDescriptorRanges = 2;
+	rootParam.DescriptorTable.NumDescriptorRanges = 2;  // テクスチャと定数で2
 
+	// サンプラー（uv値によってテクスチャデータからどう色を取り出すかを決めるための設定）
 	D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -73,47 +75,52 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 }
 
 
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, DXGI_FORMAT dgxiFormat, D3D12_CPU_DESCRIPTOR_HANDLE heapHandle) {
+// レンダリング処理（のコマンドリストへの登録）
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
+	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
+	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescriptorHeap)
+{
+	// バリアを設定
+	ID3D12Resource* backBuffer;
+	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
+	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
+	auto resourceBarrier = createResourceBarrier(backBuffer);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
-	shaderResourceViewDesc.Format = dgxiFormat;
-	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	commandList->ResourceBarrier(1, &resourceBarrier);
 
-	dev->CreateShaderResourceView(texBuffer, &shaderResourceViewDesc, heapHandle);
-}
+	// パイプラインステートをセット
+	commandList->SetPipelineState(pipelineState);
 
+	// これから使うレンダーターゲットビューとしてrtvHandleをセット
+	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
 
-ID3D12DescriptorHeap* createDescriptorHeapAndViewsForSRV_CBV(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12Resource* constBuffer, DXGI_FORMAT dgxiFormat) {
+	// クリア
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-	ID3D12DescriptorHeap* descHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NodeMask = 0;
-	descHeapDesc.NumDescriptors = 2;
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	auto result = dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descHeap));
+	// レンダリング設定（Chapter04まで）
+	commandList->RSSetViewports(1, &viewport);
+	commandList->RSSetScissorRects(1, &scissorRect);
+	commandList->SetGraphicsRootSignature(rootSignature);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetIndexBuffer(&indexBufferView);
 
-	auto heapHandle = descHeap->GetCPUDescriptorHandleForHeapStart();
-	createShaderResourceView(dev, texBuffer, dgxiFormat, heapHandle);
-	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	// レンダリング設定（Chapter05で追加）
+	commandList->SetDescriptorHeaps(1, &basicDescriptorHeap);
+	commandList->SetGraphicsRootDescriptorTable(0, basicDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-	D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDesc = {};
-	constantBufferViewDesc.BufferLocation = constBuffer->GetGPUVirtualAddress();
-	constantBufferViewDesc.SizeInBytes = static_cast<UINT>(constBuffer->GetDesc().Width);
-	dev->CreateConstantBufferView(&constantBufferViewDesc, heapHandle);
+	// レンダリング
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-	return descHeap;
-}
-
-
-ID3D12Resource* createConstBuffer(ID3D12Device* dev) {
-	ID3D12Resource* constBuffer = nullptr;
-	auto constHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	auto constResourceDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(XMMATRIX) + 0xff) & ~0xff);
-	auto result = dev->CreateCommittedResource(&constHeapProperties, D3D12_HEAP_FLAG_NONE, &constResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&constBuffer));
-	return constBuffer;
+	// バリアによる完了待ち
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	commandList->ResourceBarrier(1, &resourceBarrier);
 }
 
 
@@ -164,39 +171,34 @@ void main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// テクスチャ設定
+	// Chapter05
 	TexMetadata metadata = {};
 	ScratchImage scratchImg = {};
 	result = LoadFromWICFile(L"textest.png", WIC_FLAGS_NONE, &metadata, scratchImg);
 	auto img = scratchImg.GetImage(0, 0, 0);
 	auto texHeapProperties = createTexHeapProperties();
 	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
-	auto texDescriptorHeap = createTexDescriptorHeap(dev);
-	createShaderResourceView(dev, texBuffer, texDescriptorHeap, metadata.format);
+	auto basicDescriptorHeap = createTexDescriptorHeap(dev);
+	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, metadata.format);
 
+	// 定数バッファ
 	auto constBuffer = createConstBuffer(dev);
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap);
 	
-	auto worldMat = XMMatrixRotationY(XM_PIDIV4);
+	// マトリクス作成
 	XMFLOAT3 eye(0, 0, -5);
 	XMFLOAT3 target(0, 0, 0);
 	XMFLOAT3 up(0, 1, 0);
 	auto viewMat = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 	auto projMat = XMMatrixPerspectiveFovLH(XM_PIDIV2, static_cast<float>(windowWidth) / static_cast<float>(windowHeight), 1.0f, 10.0f);
-
 	XMMATRIX* mapMatrix;
 	result = constBuffer->Map(0, nullptr, (void**)&mapMatrix);
-	*mapMatrix = worldMat * viewMat * projMat;
 
-	auto descHeapForSRV_CBV = createDescriptorHeapAndViewsForSRV_CBV(dev, texBuffer, constBuffer, metadata.format);
-
-	ID3D12Fence* fence = nullptr;
-	UINT64 fenceVal = 0;
-	result = dev->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-
+	auto fence = createFence(dev);
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg = {};
-
+	UINT64 fenceVal = 0;
 	float angle = 0.0f;
 	while (true)
 	{
@@ -207,42 +209,10 @@ void main() {
 		if (msg.message == WM_QUIT) break;
 
 		angle += 0.1f;
-		worldMat = XMMatrixRotationY(angle);
+		auto worldMat = XMMatrixRotationY(angle);
 		*mapMatrix = worldMat * viewMat * projMat;
 
-		auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
-		auto resourceBarrier = createResourceBarrier(backBuffers[bufferIdx]);
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
-		commandList->SetPipelineState(pipelineState);
-
-		auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
-
-		float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
-		commandList->SetGraphicsRootSignature(rootSignature);
-		commandList->SetDescriptorHeaps(1, &descHeapForSRV_CBV);
-
-		auto heapHandle = descHeapForSRV_CBV->GetGPUDescriptorHandleForHeapStart();
-		commandList->SetGraphicsRootDescriptorTable(0, heapHandle);
-
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-
-		commandList->IASetIndexBuffer(&indexBufferView);
-		commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
+		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, basicDescriptorHeap);
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };
