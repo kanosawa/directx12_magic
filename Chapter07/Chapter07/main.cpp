@@ -36,42 +36,6 @@ struct MatricesData {
 	XMMATRIX viewproj;
 };
 
-#pragma pack(1)
-
-struct PMDMaterial {
-	XMFLOAT3 diffuse;
-	float alpha;
-	float specularity;
-	XMFLOAT3 specular;
-	XMFLOAT3 ambient;
-	unsigned char toonIdx;
-	unsigned char edgeFlg;
-	unsigned int indicesNum;
-	char texFilePath[20];
-};
-
-#pragma pack()
-
-struct MaterialForHlsl {
-	XMFLOAT3 diffuse;
-	float alpha;
-	XMFLOAT3 specular;
-	float specularity;
-	XMFLOAT3 ambient;
-};
-
-struct AdditionalMaterial {
-	std::string texPath;
-	int toonIdx;
-	bool edgeFlg;
-};
-
-struct Material {
-	unsigned int indicesNum;
-	MaterialForHlsl material;
-	AdditionalMaterial additional;
-};
-
 
 LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -628,23 +592,7 @@ void main() {
 	std::vector<unsigned short> indices(indicesNum);
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
 
-	unsigned int materialNum;
-	fread(&materialNum, sizeof(materialNum), 1, fp);
-
-	std::vector<PMDMaterial> pmdMaterials(materialNum);
-	fread(pmdMaterials.data(), pmdMaterials.size() * sizeof(PMDMaterial), 1, fp);
-
 	fclose(fp);
-
-	std::vector<Material> materials(pmdMaterials.size());
-	for (int i = 0; i < pmdMaterials.size(); ++i) {
-		materials[i].indicesNum = pmdMaterials[i].indicesNum;
-		materials[i].material.diffuse = pmdMaterials[i].diffuse;
-		materials[i].material.alpha = pmdMaterials[i].alpha;
-		materials[i].material.specular = pmdMaterials[i].specular;
-		materials[i].material.specularity = pmdMaterials[i].specularity;
-		materials[i].material.ambient = pmdMaterials[i].ambient;
-	}
 
 	auto result = CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -685,51 +633,7 @@ void main() {
 	auto texBuffer = createTexBuffer(dev, img, metadata);
 	auto constBuffer = createConstBuffer(dev);
 
-
-
-	auto materialBuffSize = sizeof(MaterialForHlsl);
-	materialBuffSize = (materialBuffSize + 0xff) & ~0xff;
-	ID3D12Resource* materialBuff = nullptr;
-
 	auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	auto resourceDescriptor = CD3DX12_RESOURCE_DESC::Buffer(materialBuffSize * materialNum);
-
-	result = dev->CreateCommittedResource(
-		&heapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&resourceDescriptor,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&materialBuff)
-	);
-
-	char* mapMaterial = nullptr;
-	result = materialBuff->Map(0, nullptr, (void**)&mapMaterial);
-	for (auto& m : materials) {
-		*((MaterialForHlsl*)mapMaterial) = m.material;
-		mapMaterial += materialBuffSize;
-	}
-	materialBuff->Unmap(0, nullptr);
-
-	ID3D12DescriptorHeap* materialDescHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC matDescHeapDesc = {};
-	matDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	matDescHeapDesc.NodeMask = 0;
-	matDescHeapDesc.NumDescriptors = materialNum;
-	matDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	result = dev->CreateDescriptorHeap(&matDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));
-
-	D3D12_CONSTANT_BUFFER_VIEW_DESC matCBVDesc = {};
-	matCBVDesc.BufferLocation = materialBuff->GetGPUVirtualAddress();
-	matCBVDesc.SizeInBytes = materialBuffSize;
-
-	auto matDescHeapH = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
-	for (int i = 0; i < materialNum; ++i) {
-		dev->CreateConstantBufferView(&matCBVDesc, matDescHeapH);
-		matDescHeapH.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		matCBVDesc.BufferLocation += materialBuffSize;
-	}
-
 	
 	auto worldMat = XMMatrixRotationY(XM_PIDIV4);
 	XMFLOAT3 eye(0, 10, -15);
