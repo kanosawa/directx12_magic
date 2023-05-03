@@ -81,7 +81,7 @@ D3D12_INDEX_BUFFER_VIEW createIndexBufferView(ID3D12Resource* indexBuffer, std::
 	D3D12_INDEX_BUFFER_VIEW indexBufferView = {};
 	indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
 	indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-	indexBufferView.SizeInBytes = sizeof(indices);
+	indexBufferView.SizeInBytes = sizeof(indices[0]) * indices.size();
 	return indexBufferView;
 }
 
@@ -117,14 +117,14 @@ ID3DBlob* createPixelShaderBlob() {
 	return pixelShaderBlob;
 }
 
-/*
+
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	return inputLayout;
 }
-*/
+
 
 ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature, std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout) {
 

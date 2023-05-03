@@ -81,7 +81,7 @@ D3D12_INDEX_BUFFER_VIEW createIndexBufferView(ID3D12Resource* indexBuffer, std::
 	D3D12_INDEX_BUFFER_VIEW indexBufferView = {};
 	indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
 	indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-	indexBufferView.SizeInBytes = sizeof(indices);
+	indexBufferView.SizeInBytes = sizeof(indices[0]) * indices.size();
 	return indexBufferView;
 }
 
