@@ -45,8 +45,11 @@ ID3DBlob* createPixelShaderBlob();
 // Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
 
+// インプットレイアウトを作成
+std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
+
 // グラフィックスパイプラインステートを作成
-ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature);
+ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature, std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout);
 
 // ビューポートを作成
 D3D12_VIEWPORT createViewPort(int windowWidth, int windowHeight);
