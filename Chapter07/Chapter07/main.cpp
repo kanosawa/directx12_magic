@@ -40,6 +40,7 @@ struct PMDVertex {
 
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
+	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
 	D3D12_DESCRIPTOR_RANGE descTableRange[2] = {};
 	descTableRange[0].NumDescriptors = 1;
 	descTableRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -51,12 +52,14 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 	descTableRange[1].BaseShaderRegister = 0;
 	descTableRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	// ルートパラメーター（ディスクリプタテーブルの実体。ディスクリプタテーブルはテクスチャなどをCPU/GPUで共通認識するための仕組み）
 	D3D12_ROOT_PARAMETER rootParam = {};
 	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParam.DescriptorTable.pDescriptorRanges = &descTableRange[0];
-	rootParam.DescriptorTable.NumDescriptorRanges = 2;
+	rootParam.DescriptorTable.NumDescriptorRanges = 2;  // テクスチャと定数で2
 
+	// サンプラー（uv値によってテクスチャデータからどう色を取り出すかを決めるための設定）
 	D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -197,42 +200,7 @@ void main() {
 		mapMatrix->world = worldMat;
 		mapMatrix->viewproj = viewMat * projMat;
 
-		auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
-		auto resourceBarrier = createResourceBarrier(backBuffers[bufferIdx]);
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
-		commandList->SetPipelineState(pipelineState);
-
-		auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-		auto dsvHandle = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		commandList->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
-		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-		float clearColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
-		commandList->SetGraphicsRootSignature(rootSignature);
-		commandList->SetDescriptorHeaps(1, &basicDescriptorHeap);
-
-		auto heapHandle = basicDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-		commandList->SetGraphicsRootDescriptorTable(0, heapHandle);
-
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-		commandList->IASetIndexBuffer(&indexBufferView);
-
-		commandList->DrawIndexedInstanced(indicesNum, 1, 0, 0, 0);
-
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
+		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, basicDescriptorHeap, depthDescriptorHeap, indicesNum);
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };
