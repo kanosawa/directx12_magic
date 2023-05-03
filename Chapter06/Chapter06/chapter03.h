@@ -38,6 +38,3 @@ std::vector<ID3D12Resource*> createRenderTargetViewAndGetBuckBuffers(ID3D12Devic
 
 // フェンスを作成（コマンド実行完了確認のための仕組み）
 ID3D12Fence* createFence(ID3D12Device* dev);
-
-// バリアを作成（排他制御のための仕組み）
-D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);

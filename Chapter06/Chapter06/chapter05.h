@@ -42,3 +42,12 @@ ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev);
 
 // シェーダーリソースビューを作成
 void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, DXGI_FORMAT format);
+
+// バリアを作成（排他制御のための仕組み）
+D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);
+
+// レンダリング処理（のコマンドリストへの登録）
+// basicDescHeapはChapter05の時点ではテクスチャ専用だが、Chapter06移行で定数と兼用になる
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
+	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
+	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap);
