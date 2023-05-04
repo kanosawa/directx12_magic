@@ -32,6 +32,7 @@ void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID
 }
 
 
+/*
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
@@ -92,4 +93,4 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	return rootSignature;
 }
-
+*/

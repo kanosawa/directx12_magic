@@ -15,6 +15,7 @@
 #include "chapter05.h"
 #include "chapter06.h"
 #include "chapter07.h"
+#include "chapter08.h"
 
 
 #ifdef _DEBUG
@@ -329,62 +330,6 @@ int main() {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif
 
-	const unsigned int windowWidth = 1280;
-	const unsigned int windowHeight = 720;
-
-	// Chapter03
-	auto windowClass = createWindowClass();
-	auto hwnd = createWindowHandle(windowClass, windowWidth, windowHeight);
-	/*
-	auto dev = createDevice();
-	auto dxgiFactory = createFactory();
-	auto commandAllocator = createCommandAllocator(dev);
-	auto commandList = createCommandList(dev, commandAllocator);
-	auto commandQueue = createCommandQueue(dev);
-	auto swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
-	*/
-	dev = createDevice();
-	dxgiFactory = createFactory();
-	commandAllocator = createCommandAllocator(dev);
-	commandList = createCommandList(dev, commandAllocator);
-	commandQueue = createCommandQueue(dev);
-	swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
-
-	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
-	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
-
-
-	loadLambdaTable["sph"] = loadLambdaTable["spa"] = loadLambdaTable["bmp"] = loadLambdaTable["png"] = loadLambdaTable["jpg"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, meta, img);
-	};
-
-	loadLambdaTable["tga"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromTGAFile(path.c_str(), meta, img);
-	};
-
-	loadLambdaTable["dds"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromDDSFile(path.c_str(), DDS_FLAGS_NONE, meta, img);
-	};
-
-
-
-	// デプスバッファ
-	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
-	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
-	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);
-
-
-
-	ID3D12Fence* _fence = nullptr;
-	UINT64 _fenceVal = 0;
-	auto result = dev->CreateFence(_fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
-
-	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
-
-	auto whiteTex = CreateWhiteTexture();
-	auto blackTex = CreateBlackTexture();
-	auto gradTex = CreateGrayGradationTexture();
-
 	//PMDヘッダ構造体
 	struct PMDHeader {
 		float version; //例：00 00 80 3F == 1.00
@@ -399,7 +344,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	string strModelPath = "Model/巡音ルカ.pmd";
 	//string strModelPath = "Model/初音ミク.pmd";
 	FILE* fp;
-	fopen_s(&fp,strModelPath.c_str(), "rb");
+	fopen_s(&fp, strModelPath.c_str(), "rb");
 	fread(signature, sizeof(signature), 1, fp);
 	fread(&pmdheader, sizeof(pmdheader), 1, fp);
 
@@ -424,7 +369,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma pack()//1バイトパッキング解除
 
 	//シェーダ側に投げられるマテリアルデータ
-	struct MaterialForHlsl{
+	struct MaterialForHlsl {
 		XMFLOAT3 diffuse; //ディフューズ色
 		float alpha; // ディフューズα
 		XMFLOAT3 specular; //スペキュラ色
@@ -457,6 +402,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::vector<unsigned short> indices(indicesNum);
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);//一気に読み込み
 
+	const unsigned int windowWidth = 1280;
+	const unsigned int windowHeight = 720;
+
+	// Chapter03
+	auto windowClass = createWindowClass();
+	auto hwnd = createWindowHandle(windowClass, windowWidth, windowHeight);
+	/*
+	auto dev = createDevice();
+	auto dxgiFactory = createFactory();
+	auto commandAllocator = createCommandAllocator(dev);
+	auto commandList = createCommandList(dev, commandAllocator);
+	auto commandQueue = createCommandQueue(dev);
+	auto swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
+	*/
+	dev = createDevice();
+	dxgiFactory = createFactory();
+	commandAllocator = createCommandAllocator(dev);
+	commandList = createCommandList(dev, commandAllocator);
+	commandQueue = createCommandQueue(dev);
+	swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
+
+	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
+	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 
 
 	// Chapter04
@@ -472,11 +440,48 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
-	// auto rootSignature = createRootSignature(dev);
-	// auto inputLayout = createInputLayout();
-	// auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
+	auto rootSignature = createRootSignature(dev);
+	auto inputLayout = createInputLayout();
+	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
+
+	// Chapter05, 06
+	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
+	auto constBuffer = createConstBuffer(dev);
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
+
+
+	loadLambdaTable["sph"] = loadLambdaTable["spa"] = loadLambdaTable["bmp"] = loadLambdaTable["png"] = loadLambdaTable["jpg"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
+		return LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, meta, img);
+	};
+
+	loadLambdaTable["tga"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
+		return LoadFromTGAFile(path.c_str(), meta, img);
+	};
+
+	loadLambdaTable["dds"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
+		return LoadFromDDSFile(path.c_str(), DDS_FLAGS_NONE, meta, img);
+	};
+
+
+
+	// デプスバッファ
+	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
+	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
+	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);
+
+
+
+	ID3D12Fence* _fence = nullptr;
+	UINT64 _fenceVal = 0;
+	auto result = dev->CreateFence(_fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
+
+	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
+
+	auto whiteTex = CreateWhiteTexture();
+	auto blackTex = CreateBlackTexture();
+	auto gradTex = CreateGrayGradationTexture();
 
 
 	unsigned int materialNum;//マテリアル数
@@ -664,80 +669,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	ID3DBlob* errorBlob = nullptr;
 
-	ID3D12RootSignature* rootsignature = nullptr;
-	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	D3D12_DESCRIPTOR_RANGE descTblRange[3] = {};//テクスチャと定数の２つ
-
-
-	//定数ひとつ目(座標変換用)
-	descTblRange[0].NumDescriptors = 1;//定数ひとつ
-	descTblRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;//種別は定数
-	descTblRange[0].BaseShaderRegister = 0;//0番スロットから
-	descTblRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	//定数ふたつめ(マテリアル用)
-	descTblRange[1].NumDescriptors = 1;//デスクリプタヒープはたくさんあるが一度に使うのは１つ
-	descTblRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;//種別は定数
-	descTblRange[1].BaseShaderRegister = 1;//1番スロットから
-	descTblRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	//テクスチャ1つ目(↑のマテリアルとペア)
-	descTblRange[2].NumDescriptors = 4;//テクスチャ４つ(基本とsphとspaとトゥーン)
-	descTblRange[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;//種別はテクスチャ
-	descTblRange[2].BaseShaderRegister = 0;//0番スロットから
-	descTblRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	D3D12_ROOT_PARAMETER rootparam[2] = {};
-	rootparam[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootparam[0].DescriptorTable.pDescriptorRanges = &descTblRange[0];//デスクリプタレンジのアドレス
-	rootparam[0].DescriptorTable.NumDescriptorRanges = 1;//デスクリプタレンジ数
-	rootparam[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//全てのシェーダから見える
-
-	rootparam[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootparam[1].DescriptorTable.pDescriptorRanges = &descTblRange[1];//デスクリプタレンジのアドレス
-	rootparam[1].DescriptorTable.NumDescriptorRanges = 2;//デスクリプタレンジ数←ここ
-	rootparam[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//ピクセルシェーダから見える
-
-	rootSignatureDesc.pParameters = rootparam;//ルートパラメータの先頭アドレス
-	rootSignatureDesc.NumParameters = 2;//ルートパラメータ数
-
-	D3D12_STATIC_SAMPLER_DESC samplerDesc[2] = {};
-	samplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//横繰り返し
-	samplerDesc[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//縦繰り返し
-	samplerDesc[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//奥行繰り返し
-	samplerDesc[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;//ボーダーの時は黒
-	samplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;//補間しない(ニアレストネイバー)
-	samplerDesc[0].MaxLOD = D3D12_FLOAT32_MAX;//ミップマップ最大値
-	samplerDesc[0].MinLOD = 0.0f;//ミップマップ最小値
-	samplerDesc[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;//オーバーサンプリングの際リサンプリングしない？
-	samplerDesc[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//ピクセルシェーダからのみ可視
-	samplerDesc[0].ShaderRegister = 0;
-	samplerDesc[1] = samplerDesc[0];//変更点以外をコピー
-	samplerDesc[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;//
-	samplerDesc[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	samplerDesc[1].ShaderRegister = 1;
-	rootSignatureDesc.pStaticSamplers = samplerDesc;
-	rootSignatureDesc.NumStaticSamplers = 2;
-	
-	ID3DBlob* rootSigBlob = nullptr;
-	result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
-	result = dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
-	rootSigBlob->Release();
-
-
-	auto inputLayout = createInputLayout();
-	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootsignature, inputLayout);
-
-
-	// Chapter05, 06
-	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
-	auto constBuffer = createConstBuffer(dev);
-	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
-
-
 
 	//シェーダ側に渡すための基本的な環境データ
 	struct SceneData {
@@ -818,7 +749,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 		commandList->IASetIndexBuffer(&indexBufferView);
 
-		commandList->SetGraphicsRootSignature(rootsignature);
+		commandList->SetGraphicsRootSignature(rootSignature);
 		
 		//WVP変換行列
 		commandList->SetDescriptorHeaps(1, &basicDescriptorHeap);
