@@ -29,6 +29,12 @@ D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, st
 // ※chapter07で再定義
 // std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
 
+// テクスチャヒーププロパティを作成
+D3D12_HEAP_PROPERTIES createTexHeapProperties();
+
+// テクスチャリソースディスクリプタを作成
+D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata);
+
 // テクスチャファイルを読み込み、バッファを作成
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename);
 
