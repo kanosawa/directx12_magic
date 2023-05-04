@@ -91,8 +91,8 @@ void main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// Chapter05, 06（テクスチャ関連は削除）
-	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 1); // テクスチャがないのでnumDescriptorsは1
+	// Chapter05, 06
+	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2); // テクスチャは無く、定数のみだが、Chapter06との処理共通化のためにnumDescriptor=2としておく
 	auto constBuffer = createConstBuffer(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap);
 
