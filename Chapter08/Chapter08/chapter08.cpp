@@ -1,6 +1,61 @@
 #include <functional>
 #include <map>
+#include "chapter05.h"
 #include "chapter08.h"
+
+using namespace DirectX;
+
+
+std::string GetTexturePathFromModelAndTexPath(const std::string& modelPath, const char* texPath) {
+	//ファイルのフォルダ区切りは\と/の二種類が使用される可能性があり
+	//ともかく末尾の\か/を得られればいいので、双方のrfindをとり比較する
+	//int型に代入しているのは見つからなかった場合はrfindがepos(-1→0xffffffff)を返すため
+	auto pathIndex1 = modelPath.rfind('/');
+	auto pathIndex2 = modelPath.rfind('\\');
+	auto pathIndex = max(pathIndex1, pathIndex2);
+	auto folderPath = modelPath.substr(0, pathIndex + 1);
+	return folderPath + texPath;
+}
+
+
+std::string GetExtension(const std::string& path) {
+	auto idx = path.rfind('.');
+	return path.substr(idx + 1, path.length() - idx - 1);
+}
+
+
+std::wstring GetExtension(const std::wstring& path) {
+	auto idx = path.rfind(L'.');
+	return path.substr(idx + 1, path.length() - idx - 1);
+}
+
+
+std::pair<std::string, std::string> SplitFileName(const std::string& path, const char splitter) {
+	auto idx = path.find(splitter);
+	std::pair<std::string, std::string> ret;
+	ret.first = path.substr(0, idx);
+	ret.second = path.substr(idx + 1, path.length() - idx - 1);
+	return ret;
+}
+
+
+std::wstring GetWideStringFromString(const std::string& str) {
+	//呼び出し1回目(文字列数を得る)
+	auto num1 = MultiByteToWideChar(CP_ACP,
+		MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
+		str.c_str(), -1, nullptr, 0);
+
+	std::wstring wstr;//stringのwchar_t版
+	wstr.resize(num1);//得られた文字列数でリサイズ
+
+	//呼び出し2回目(確保済みのwstrに変換文字列をコピー)
+	auto num2 = MultiByteToWideChar(CP_ACP,
+		MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
+		str.c_str(), -1, &wstr[0], num1);
+
+	assert(num1 == num2);//一応チェック
+	return wstr;
+}
 
 
 std::vector<PMDMaterial> readPmdMaterials(FILE* fp) {
@@ -41,6 +96,29 @@ std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials) {
 	return materials;
 }
 
+
+ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename) {
+
+	TexMetadata metadata = {};
+	ScratchImage scratchImg = {};
+	auto result = LoadFromWICFile(textureFilename, WIC_FLAGS_NONE, &metadata, scratchImg);
+	auto img = scratchImg.GetImage(0, 0, 0);
+
+	auto texHeapProperties = createTexHeapProperties();
+	auto texResourceDesc = createTexResourceDescriptor(metadata);
+
+	ID3D12Resource* texBuffer = nullptr;
+	result = dev->CreateCommittedResource(
+		&texHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&texResourceDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		nullptr,
+		IID_PPV_ARGS(&texBuffer)
+	);
+	result = texBuffer->WriteToSubresource(0, nullptr, img->pixels, img->rowPitch, img->slicePitch);
+	return texBuffer;
+}
 
 
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {

@@ -8,6 +8,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <d3dx12.h>
+#include <DirectXTex.h>
 #include "chapter07.h"
 
 using namespace DirectX;
@@ -58,6 +59,13 @@ struct PMD_MODEL_08 {
 };
 
 
+// ファイル名関連関数
+std::string GetTexturePathFromModelAndTexPath(const std::string& modelPath, const char* texPath);
+std::string GetExtension(const std::string& path);
+std::wstring GetExtension(const std::wstring& path);
+std::pair<std::string, std::string> SplitFileName(const std::string& path, const char splitter = '*');
+std::wstring GetWideStringFromString(const std::string& str);
+
 // PMDファイルのマテリアル情報を読み込む
 std::vector<PMDMaterial> readPmdMaterials(FILE* fp);
 
@@ -66,6 +74,9 @@ PMD_MODEL_08 readPmdFile08(std::string pmdFileName);
 
 // PMDMaterialからMaterialへマテリアル情報をコピー
 std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials);
+
+// テクスチャファイルを読み込み、バッファを作成（複数拡張子対応版）
+ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename);
 
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
