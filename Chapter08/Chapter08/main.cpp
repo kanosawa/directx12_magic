@@ -664,73 +664,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	ID3DBlob* errorBlob = nullptr;
 
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-		{ "NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-		{ "TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-		{ "BONE_NO",0,DXGI_FORMAT_R16G16_UINT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-		{ "WEIGHT",0,DXGI_FORMAT_R8_UINT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-		//{ "EDGE_FLG",0,DXGI_FORMAT_R8_UINT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-	};
-
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
-	gpipeline.pRootSignature = nullptr;
-
-	gpipeline.VS.pShaderBytecode = vertexShaderBlob->GetBufferPointer();
-	gpipeline.VS.BytecodeLength = vertexShaderBlob->GetBufferSize();
-	gpipeline.PS.pShaderBytecode = pixelShaderBlob->GetBufferPointer();
-	gpipeline.PS.BytecodeLength = pixelShaderBlob->GetBufferSize();
-
-	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;//中身は0xffffffff
-
-	//
-	gpipeline.BlendState.AlphaToCoverageEnable = false;
-	gpipeline.BlendState.IndependentBlendEnable = false;
-
-	D3D12_RENDER_TARGET_BLEND_DESC renderTargetBlendDesc = {};
-
-	//ひとまず加算や乗算やαブレンディングは使用しない
-	renderTargetBlendDesc.BlendEnable = false;
-	renderTargetBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-
-	//ひとまず論理演算は使用しない
-	renderTargetBlendDesc.LogicOpEnable = false;
-	
-	gpipeline.BlendState.RenderTarget[0] = renderTargetBlendDesc;
-	
-	gpipeline.RasterizerState.MultisampleEnable = false;//まだアンチェリは使わない
-	gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;//カリングしない
-	gpipeline.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;//中身を塗りつぶす
-	gpipeline.RasterizerState.DepthClipEnable = true;//深度方向のクリッピングは有効に
-
-	gpipeline.RasterizerState.FrontCounterClockwise = false;
-	gpipeline.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-	gpipeline.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-	gpipeline.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-	gpipeline.RasterizerState.AntialiasedLineEnable = false;
-	gpipeline.RasterizerState.ForcedSampleCount = 0;
-	gpipeline.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-
-
-	gpipeline.DepthStencilState.DepthEnable = true;//深度バッファを使うぞ
-	gpipeline.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;//全て書き込み
-	gpipeline.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;//小さい方を採用
-	gpipeline.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-	gpipeline.DepthStencilState.StencilEnable = false;
-
-	gpipeline.InputLayout.pInputElementDescs = inputLayout;//レイアウト先頭アドレス
-	gpipeline.InputLayout.NumElements = _countof(inputLayout);//レイアウト配列数
-
-	gpipeline.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;//ストリップ時のカットなし
-	gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;//三角形で構成
-
-	gpipeline.NumRenderTargets = 1;//今は１つのみ
-	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;//0～1に正規化されたRGBA
-
-	gpipeline.SampleDesc.Count = 1;//サンプリングは1ピクセルにつき１
-	gpipeline.SampleDesc.Quality = 0;//クオリティは最低
-
 	ID3D12RootSignature* rootsignature = nullptr;
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
 	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -794,10 +727,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
 	rootSigBlob->Release();
 
-	gpipeline.pRootSignature = rootsignature;
-	ID3D12PipelineState* _pipelinestate = nullptr;
-	result = dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
-	
+
+	auto inputLayout = createInputLayout();
+	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootsignature, inputLayout);
 
 
 	// Chapter05, 06
@@ -865,7 +797,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		commandList->ResourceBarrier(1, &barrier);
 
-		commandList->SetPipelineState(_pipelinestate);
+		commandList->SetPipelineState(pipelineState);
 
 
 		//レンダーターゲットを指定
@@ -933,7 +865,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//フリップ
 		swapChain->Present(0, 0);
 		commandAllocator->Reset();//キューをクリア
-		commandList->Reset(commandAllocator, _pipelinestate);//再びコマンドリストをためる準備
+		commandList->Reset(commandAllocator, pipelineState);//再びコマンドリストをためる準備
 
 	}
 	//もうクラス使わんから登録解除してや
