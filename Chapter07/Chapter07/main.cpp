@@ -12,38 +12,10 @@ using namespace DirectX;
 #pragma comment(lib, "DirectXTex.lib")
 
 
-struct PMDHeader {
-	float version;
-	char model_name[20];
-	char comment[256];
-};
+
 
 
 void main() {
-
-	auto fp = fopen("Model/初音ミク.pmd", "rb");
-
-	char signature[3] = {};
-	PMDHeader pmdheader = {};
-	fread(signature, sizeof(signature), 1, fp);
-	fread(&pmdheader, sizeof(pmdheader), 1, fp);
-
-	unsigned int vertNum;
-	fread(&vertNum, sizeof(vertNum), 1, fp);
-
-	size_t pmdvertex_size = 38;
-	std::vector<PMD_VERTEX> vertices(vertNum);
-	for (auto i = 0; i < vertNum; i++) {
-		fread(&vertices[i], pmdvertex_size, 1, fp);
-	}
-
-	unsigned int indicesNum;
-	fread(&indicesNum, sizeof(indicesNum), 1, fp);
-	
-	std::vector<unsigned short> indices(indicesNum);
-	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
-
-	fclose(fp);
 
 	auto result = CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -61,6 +33,11 @@ void main() {
 	auto swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
 	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
+
+	// PMDファイルの読み込み
+	auto pmdModel = readPmdFile("model/初音ミク.pmd");
+	auto vertices = pmdModel.vertices;
+	auto indices = pmdModel.indices;
 
 	// Chapter04
 	auto vertexHeapProperties = createHeapProperties();
@@ -121,7 +98,7 @@ void main() {
 		mapMatrix->world = worldMat;
 		mapMatrix->viewproj = viewMat * projMat;
 
-		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, basicDescriptorHeap, depthDescriptorHeap, indicesNum);
+		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, basicDescriptorHeap, depthDescriptorHeap, indices.size());
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };

@@ -29,6 +29,19 @@ struct PMD_VERTEX
 };
 #pragma pack(pop)
 
+struct PMDHeader {
+	float version;
+	char model_name[20];
+	char comment[256];
+};
+
+struct PMD_MODEL_07 {
+	std::vector<PMD_VERTEX> vertices;
+	std::vector<unsigned short> indices;
+};
+
+// PMDファイルを読み込む
+PMD_MODEL_07 readPmdFile(std::string pmdFileName);
 
 // 頂点バッファをマップ（PMDファイル版）
 void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices);
