@@ -366,58 +366,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		return LoadFromDDSFile(path.c_str(), DDS_FLAGS_NONE, meta, img);
 	};
 
-	//深度バッファ作成
-	//深度バッファの仕様
-	D3D12_RESOURCE_DESC depthResDesc = {};
-	depthResDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;//2次元のテクスチャデータとして
-	depthResDesc.Width = windowWidth;//幅と高さはレンダーターゲットと同じ
-	depthResDesc.Height = windowHeight;//上に同じ
-	depthResDesc.DepthOrArraySize = 1;//テクスチャ配列でもないし3Dテクスチャでもない
-	depthResDesc.Format=DXGI_FORMAT_D32_FLOAT;//深度値書き込み用フォーマット
-	depthResDesc.SampleDesc.Count = 1;//サンプルは1ピクセル当たり1つ
-	depthResDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;//このバッファは深度ステンシルとして使用します
-	depthResDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	depthResDesc.MipLevels = 1;
 
-	//デプス用ヒーププロパティ
-	D3D12_HEAP_PROPERTIES depthHeapProp = {};
-	depthHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;//DEFAULTだから後はUNKNOWNでよし
-	depthHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	depthHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
-	//このクリアバリューが重要な意味を持つ
-	D3D12_CLEAR_VALUE _depthClearValue = {};
-	_depthClearValue.DepthStencil.Depth = 1.0f;//深さ１(最大値)でクリア
-	_depthClearValue.Format = DXGI_FORMAT_D32_FLOAT;//32bit深度値としてクリア
+	// デプスバッファ
+	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
+	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
+	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);
 
-	ID3D12Resource* depthBuffer = nullptr;
-	auto result = dev->CreateCommittedResource(
-		&depthHeapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&depthResDesc,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE, //デプス書き込みに使用
-		&_depthClearValue,
-		IID_PPV_ARGS(&depthBuffer));
-
-	//深度のためのデスクリプタヒープ作成
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};//深度に使うよという事がわかればいい
-	dsvHeapDesc.NumDescriptors = 1;//深度ビュー1つのみ
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;//デプスステンシルビューとして使う
-	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	ID3D12DescriptorHeap* dsvHeap = nullptr;
-	result = dev->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
-
-	//深度ビュー作成
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;//デプス値に32bit使用
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;//2Dテクスチャ
-	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;//フラグは特になし
-	dev->CreateDepthStencilView(depthBuffer, &dsvDesc, dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
 
 	ID3D12Fence* _fence = nullptr;
 	UINT64 _fenceVal = 0;
-	result = dev->CreateFence(_fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
+	auto result = dev->CreateFence(_fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
 
 	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
 
@@ -933,7 +893,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MSG msg = {};
 	unsigned int frame = 0;
 	float angle = 0.0f;
-	auto dsvH = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+	// auto dsvH = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+	auto dsvH = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	while (true) {
 		worldMat=XMMatrixRotationY(angle);
 		mapScene->world = worldMat;
