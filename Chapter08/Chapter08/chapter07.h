@@ -40,6 +40,15 @@ struct PMD_MODEL_07 {
 	std::vector<unsigned short> indices;
 };
 
+// PMDファイルのヘッダを読み込む
+void readPmdHeader(FILE* fp);
+
+// PMDファイルの頂点情報を読み込む
+std::vector<PMD_VERTEX> readPmdVertices(FILE* fp);
+
+// PMDファイルのインデックス情報を読み込む
+std::vector<unsigned short> readPmdIndices(FILE* fp);
+
 // PMDファイルを読み込む
 PMD_MODEL_07 readPmdFile(std::string pmdFileName);
 
