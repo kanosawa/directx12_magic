@@ -8,9 +8,9 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <d3dx12.h>
+#include "chapter07.h"
 
 using namespace DirectX;
-
 
 #pragma pack(1)
 struct PMDMaterial {
@@ -26,6 +26,12 @@ struct PMDMaterial {
 	char texFilePath[20];
 };
 #pragma pack()
+
+struct PMD_MODEL_08 {
+	std::vector<PMD_VERTEX> vertices;
+	std::vector<unsigned short> indices;
+	std::vector<PMDMaterial> materials;
+};
 
 //シェーダ側に投げられるマテリアルデータ
 struct MaterialForHlsl {
@@ -48,6 +54,11 @@ struct Material {
 	AdditionalMaterial additional;
 };
 
+// PMDファイルのマテリアル情報を読み込む
+std::vector<PMDMaterial> readPmdMaterials(FILE* fp);
+
+// PMDファイルを読み込む（マテリアル追加版）
+PMD_MODEL_08 readPmdFile08(std::string pmdFileName);
 
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

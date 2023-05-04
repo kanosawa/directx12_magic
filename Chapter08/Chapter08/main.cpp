@@ -16,12 +16,6 @@
 using namespace DirectX;
 using namespace std;
 
-struct PMDHeader {
-	float version;
-	char model_name[20];
-	char comment[256];
-};
-
 
 ID3D12Device* dev = nullptr;
 IDXGIFactory6* dxgiFactory = nullptr;
@@ -317,30 +311,6 @@ void EnableDebugLayer() {
 
 int main() {
 
-	string strModelPath = "Model/巡音ルカ.pmd";
-	FILE* fp;
-	fopen_s(&fp, strModelPath.c_str(), "rb");
-
-	char signature[3] = {};
-	PMDHeader pmdheader = {};
-	fread(signature, sizeof(signature), 1, fp);
-	fread(&pmdheader, sizeof(pmdheader), 1, fp);
-
-	unsigned int vertNum;
-	fread(&vertNum, sizeof(vertNum), 1, fp);
-
-	size_t pmdvertex_size = 38;
-	std::vector<PMD_VERTEX> vertices(vertNum);
-	for (auto i = 0; i < vertNum; i++) {
-		fread(&vertices[i], pmdvertex_size, 1, fp);
-	}
-
-	unsigned int indicesNum;
-	fread(&indicesNum, sizeof(indicesNum), 1, fp);
-
-	std::vector<unsigned short> indices(indicesNum);
-	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
-
 	const unsigned int windowWidth = 1280;
 	const unsigned int windowHeight = 720;
 
@@ -361,11 +331,117 @@ int main() {
 	commandList = createCommandList(dev, commandAllocator);
 	commandQueue = createCommandQueue(dev);
 	swapChain = createSwapChain(hwnd, dxgiFactory, commandQueue, windowWidth, windowHeight);
-
+	
 	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 
+	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
 
+	loadLambdaTable["sph"] = loadLambdaTable["spa"] = loadLambdaTable["bmp"] = loadLambdaTable["png"] = loadLambdaTable["jpg"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
+		return LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, meta, img);
+	};
+
+	loadLambdaTable["tga"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
+		return LoadFromTGAFile(path.c_str(), meta, img);
+	};
+
+	loadLambdaTable["dds"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
+		return LoadFromDDSFile(path.c_str(), DDS_FLAGS_NONE, meta, img);
+	};
+
+	string strModelPath = "model/巡音ルカ.pmd";
+	auto pmdModel = readPmdFile08(strModelPath);
+	auto vertices = pmdModel.vertices;
+	auto indices = pmdModel.indices;
+	auto pmdMaterials = pmdModel.materials;
+	auto materialNum = pmdMaterials.size();
+
+	std::vector<Material> materials(materialNum);
+
+	vector<ID3D12Resource*> textureResources(materialNum);
+	vector<ID3D12Resource*> sphResources(materialNum);
+	vector<ID3D12Resource*> spaResources(materialNum);
+	vector<ID3D12Resource*> toonResources(materialNum);
+	{
+		
+		for (int i = 0; i < pmdMaterials.size(); ++i) {
+			materials[i].indicesNum = pmdMaterials[i].indicesNum;
+			materials[i].material.diffuse = pmdMaterials[i].diffuse;
+			materials[i].material.alpha = pmdMaterials[i].alpha;
+			materials[i].material.specular = pmdMaterials[i].specular;
+			materials[i].material.specularity = pmdMaterials[i].specularity;
+			materials[i].material.ambient = pmdMaterials[i].ambient;
+			materials[i].additional.toonIdx = pmdMaterials[i].toonIdx;
+		}
+
+		for (int i = 0; i < pmdMaterials.size(); ++i) {
+			//トゥーンリソースの読み込み
+			string toonFilePath = "toon/";
+			char toonFileName[16];
+			sprintf_s(toonFileName, 16, "toon%02d.bmp", pmdMaterials[i].toonIdx + 1);
+			toonFilePath += toonFileName;
+			toonResources[i] = LoadTextureFromFile(toonFilePath);
+
+			if (strlen(pmdMaterials[i].texFilePath) == 0) {
+				textureResources[i] = nullptr;
+				continue;
+			}
+
+			string texFileName = pmdMaterials[i].texFilePath;
+			string sphFileName = "";
+			string spaFileName = "";
+			if (count(texFileName.begin(), texFileName.end(), '*') > 0) {//スプリッタがある
+				auto namepair = SplitFileName(texFileName);
+				if (GetExtension(namepair.first) == "sph") {
+					texFileName = string("model/") + namepair.second;
+					sphFileName = string("model/") + namepair.first;
+				}
+				else if (GetExtension(namepair.first) == "spa") {
+					texFileName = string("model/") + namepair.second;
+					spaFileName = string("model/") + namepair.first;
+				}
+				else {
+					texFileName = namepair.first;
+					if (GetExtension(namepair.second) == "sph") {
+						sphFileName = string("model/") + namepair.second;
+					}
+					else if (GetExtension(namepair.second) == "spa") {
+						spaFileName = string("model/") + namepair.second;
+					}
+				}
+			}
+			else {
+				if (GetExtension(pmdMaterials[i].texFilePath) == "sph") {
+					sphFileName = string("model/") + pmdMaterials[i].texFilePath;
+					texFileName = "";
+				}
+				else if (GetExtension(pmdMaterials[i].texFilePath) == "spa") {
+					spaFileName = string("model/") + pmdMaterials[i].texFilePath;
+					texFileName = "";
+				}
+				else {
+					texFileName = string("model/") + pmdMaterials[i].texFilePath;
+				}
+			}
+			//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
+			if (texFileName != "") {
+				auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
+				textureResources[i] = LoadTextureFromFile(texFilePath);
+			}
+			if (sphFileName != "") {
+				auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
+				sphResources[i] = LoadTextureFromFile(sphFilePath);
+			}
+			if (spaFileName != "") {
+				auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
+				spaResources[i] = LoadTextureFromFile(spaFilePath);
+			}
+
+
+		}
+
+	}
+	
 	// Chapter04
 	auto vertexHeapProperties = createHeapProperties();
 	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
@@ -390,128 +466,18 @@ int main() {
 	auto constBuffer = createConstBuffer(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
 
-
-	loadLambdaTable["sph"] = loadLambdaTable["spa"] = loadLambdaTable["bmp"] = loadLambdaTable["png"] = loadLambdaTable["jpg"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, meta, img);
-	};
-
-	loadLambdaTable["tga"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromTGAFile(path.c_str(), meta, img);
-	};
-
-	loadLambdaTable["dds"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromDDSFile(path.c_str(), DDS_FLAGS_NONE, meta, img);
-	};
-
-
-
 	// デプスバッファ
 	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
 	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
 	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);
 
-
-
 	ID3D12Fence* _fence = nullptr;
 	UINT64 _fenceVal = 0;
 	auto result = dev->CreateFence(_fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
 
-	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
-
 	auto whiteTex = CreateWhiteTexture();
 	auto blackTex = CreateBlackTexture();
 	auto gradTex = CreateGrayGradationTexture();
-
-
-	unsigned int materialNum;//マテリアル数
-	fread(&materialNum, sizeof(materialNum), 1, fp);
-	std::vector<Material> materials(materialNum);
-
-	vector<ID3D12Resource*> textureResources(materialNum);
-	vector<ID3D12Resource*> sphResources(materialNum);
-	vector<ID3D12Resource*> spaResources(materialNum);
-	vector<ID3D12Resource*> toonResources(materialNum);
-	{
-		std::vector<PMDMaterial> pmdMaterials(materialNum);
-		fread(pmdMaterials.data(), pmdMaterials.size() * sizeof(PMDMaterial), 1, fp);
-		//コピー
-		for (int i = 0; i < pmdMaterials.size(); ++i) {
-			materials[i].indicesNum = pmdMaterials[i].indicesNum;
-			materials[i].material.diffuse = pmdMaterials[i].diffuse;
-			materials[i].material.alpha = pmdMaterials[i].alpha;
-			materials[i].material.specular = pmdMaterials[i].specular;
-			materials[i].material.specularity = pmdMaterials[i].specularity;
-			materials[i].material.ambient = pmdMaterials[i].ambient;
-			materials[i].additional.toonIdx = pmdMaterials[i].toonIdx;
-		}
-
-		for (int i = 0; i < pmdMaterials.size(); ++i) {
-			//トゥーンリソースの読み込み
-			string toonFilePath = "toon/";
-			char toonFileName[16];
-			sprintf_s(toonFileName, 16,"toon%02d.bmp", pmdMaterials[i].toonIdx + 1);
-			toonFilePath += toonFileName;
-			toonResources[i] = LoadTextureFromFile(toonFilePath);
-
-			if (strlen(pmdMaterials[i].texFilePath) == 0) {
-				textureResources[i] = nullptr;
-				continue;
-			}
-
-			string texFileName= pmdMaterials[i].texFilePath;
-			string sphFileName="";
-			string spaFileName="";
-			if (count(texFileName.begin(), texFileName.end(), '*') > 0) {//スプリッタがある
-				auto namepair=SplitFileName(texFileName);
-				if (GetExtension(namepair.first) == "sph") {
-					texFileName = string("model/") + namepair.second;
-					sphFileName = string("model/") + namepair.first;
-				}
-				else if (GetExtension(namepair.first) == "spa") {
-					texFileName = string("model/") + namepair.second;
-					spaFileName = string("model/") + namepair.first;
-				}
-				else {
-					texFileName = namepair.first;
-					if (GetExtension(namepair.second) == "sph") {
-						sphFileName = string("model/") + namepair.second;
-					}
-					else if (GetExtension(namepair.second) == "spa") {
-						spaFileName = string("model/") + namepair.second;
-					}
-				}
-			}
-			else {
-				if (GetExtension(pmdMaterials[i].texFilePath) == "sph") {
-					sphFileName= string("model/") + pmdMaterials[i].texFilePath;
-					texFileName = "";
-				}else if (GetExtension(pmdMaterials[i].texFilePath) == "spa") {
-					spaFileName = string("model/") + pmdMaterials[i].texFilePath;
-					texFileName = "";
-				}
-				else {
-					texFileName = string("model/") + pmdMaterials[i].texFilePath;
-				}
-			}
-			//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
-			if (texFileName != "") {
-				auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
-				textureResources[i] = LoadTextureFromFile(texFilePath);
-			}
-			if (sphFileName != "") {
-				auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
-				sphResources[i] = LoadTextureFromFile(sphFilePath);
-			}
-			if (spaFileName != "") {
-				auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
-				spaResources[i] = LoadTextureFromFile(spaFilePath);
-			}
-			
-
-		}
-
-	}
-	fclose(fp);
 
 	//マテリアルバッファを作成
 	auto materialBuffSize = sizeof(MaterialForHlsl);

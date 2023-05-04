@@ -1,4 +1,31 @@
+#include <functional>
+#include <map>
 #include "chapter08.h"
+
+
+std::vector<PMDMaterial> readPmdMaterials(FILE* fp) {
+	unsigned int materialNum;
+	fread(&materialNum, sizeof(materialNum), 1, fp);
+	std::vector<PMDMaterial> materials(materialNum);
+	fread(materials.data(), materials.size() * sizeof(PMDMaterial), 1, fp);
+	return materials;
+}
+
+
+PMD_MODEL_08 readPmdFile08(std::string pmdFileName) {
+
+	FILE* fp;
+	fopen_s(&fp, pmdFileName.c_str(), "rb");
+
+	PMD_MODEL_08 pmd_model = {};
+	readPmdHeader(fp);
+	pmd_model.vertices = readPmdVertices(fp);
+	pmd_model.indices = readPmdIndices(fp);
+	pmd_model.materials = readPmdMaterials(fp);
+	fclose(fp);
+
+	return pmd_model;
+}
 
 
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
