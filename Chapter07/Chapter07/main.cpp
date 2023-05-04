@@ -1,13 +1,3 @@
-#include <Windows.h>
-#include <tchar.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <d3dcompiler.h>
-#include <DirectXMath.h>
-#include <vector>
-#include <string>
-#include <DirectXTex.h>
-#include <d3dx12.h>
 #include "chapter03.h"
 #include "chapter04.h"
 #include "chapter05.h"
@@ -94,7 +84,7 @@ void main() {
 	// Chapter05, 06
 	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2); // テクスチャは無く、定数のみだが、Chapter06との処理共通化のためにnumDescriptor=2としておく
 	auto constBuffer = createConstBuffer(dev);
-	createConstantBufferView(dev, constBuffer, basicDescriptorHeap);
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1); // 上記同様、ShaderResourceViewがある想定で、idx=1としている
 
 	// デプスバッファ
 	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);

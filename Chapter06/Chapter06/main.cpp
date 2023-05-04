@@ -72,7 +72,7 @@ void main() {
 
 	// 定数バッファ
 	auto constBuffer = createConstBuffer(dev);
-	createConstantBufferView(dev, constBuffer, basicDescriptorHeap);
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1);  // ShaderResourceViewの後なのでidx=1
 	
 	// マトリクス作成
 	XMFLOAT3 eye(0, 0, -5);

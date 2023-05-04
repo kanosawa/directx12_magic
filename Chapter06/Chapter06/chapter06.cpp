@@ -22,12 +22,12 @@ ID3D12Resource* createConstBuffer(ID3D12Device* dev) {
 }
 
 
-void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID3D12DescriptorHeap* basicDescriptorHeap) {
+void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID3D12DescriptorHeap* basicDescriptorHeap, UINT64 idx) {
 	D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDesc = {};
 	constantBufferViewDesc.BufferLocation = constBuffer->GetGPUVirtualAddress();
 	constantBufferViewDesc.SizeInBytes = static_cast<UINT>(constBuffer->GetDesc().Width);
 	auto heapHandle = basicDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * idx;
 	dev->CreateConstantBufferView(&constantBufferViewDesc, heapHandle);
 }
 
