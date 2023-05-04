@@ -662,46 +662,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	}
 
-	ID3DBlob* _vsBlob = nullptr;
-	ID3DBlob* _psBlob = nullptr;
-
 	ID3DBlob* errorBlob = nullptr;
-	result = D3DCompileFromFile(L"BasicVertexShader.hlsl",
-		nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		"BasicVS", "vs_5_0",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0, &_vsBlob, &errorBlob);
-	if (FAILED(result)) {
-		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
-			::OutputDebugStringA("ファイルが見当たりません");
-		}
-		else {
-			std::string errstr;
-			errstr.resize(errorBlob->GetBufferSize());
-			std::copy_n((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize(), errstr.begin());
-			errstr += "\n";
-			OutputDebugStringA(errstr.c_str());
-		}
-		exit(1);//行儀悪いかな…
-	}
-	result = D3DCompileFromFile(L"BasicPixelShader.hlsl",
-		nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		"BasicPS", "ps_5_0",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0, &_psBlob, &errorBlob);
-	if (FAILED(result)) {
-		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
-			::OutputDebugStringA("ファイルが見当たりません");
-		}
-		else {
-			std::string errstr;
-			errstr.resize(errorBlob->GetBufferSize());
-			std::copy_n((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize(), errstr.begin());
-			errstr += "\n";
-			OutputDebugStringA(errstr.c_str());
-		}
-		exit(1);//行儀悪いかな…
-	}
+
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
 		{ "NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
@@ -713,10 +675,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
 	gpipeline.pRootSignature = nullptr;
-	gpipeline.VS.pShaderBytecode = _vsBlob->GetBufferPointer();
-	gpipeline.VS.BytecodeLength = _vsBlob->GetBufferSize();
-	gpipeline.PS.pShaderBytecode = _psBlob->GetBufferPointer();
-	gpipeline.PS.BytecodeLength = _psBlob->GetBufferSize();
+
+	gpipeline.VS.pShaderBytecode = vertexShaderBlob->GetBufferPointer();
+	gpipeline.VS.BytecodeLength = vertexShaderBlob->GetBufferSize();
+	gpipeline.PS.pShaderBytecode = pixelShaderBlob->GetBufferPointer();
+	gpipeline.PS.BytecodeLength = pixelShaderBlob->GetBufferSize();
 
 	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;//中身は0xffffffff
 
