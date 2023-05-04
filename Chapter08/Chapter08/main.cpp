@@ -366,12 +366,11 @@ int main() {
 		
 		for (int i = 0; i < pmdMaterials.size(); ++i) {
 			materials[i].indicesNum = pmdMaterials[i].indicesNum;
-			materials[i].material.diffuse = pmdMaterials[i].diffuse;
-			materials[i].material.alpha = pmdMaterials[i].alpha;
-			materials[i].material.specular = pmdMaterials[i].specular;
-			materials[i].material.specularity = pmdMaterials[i].specularity;
-			materials[i].material.ambient = pmdMaterials[i].ambient;
-			materials[i].additional.toonIdx = pmdMaterials[i].toonIdx;
+			materials[i].materialForHlsl.diffuse = pmdMaterials[i].diffuse;
+			materials[i].materialForHlsl.alpha = pmdMaterials[i].alpha;
+			materials[i].materialForHlsl.specular = pmdMaterials[i].specular;
+			materials[i].materialForHlsl.specularity = pmdMaterials[i].specularity;
+			materials[i].materialForHlsl.ambient = pmdMaterials[i].ambient;
 		}
 
 		for (int i = 0; i < pmdMaterials.size(); ++i) {
@@ -498,7 +497,7 @@ int main() {
 	char* mapMaterial = nullptr;
 	result = materialBuff->Map(0, nullptr, (void**)&mapMaterial);
 	for (auto& m : materials) {
-		*((MaterialForHlsl*)mapMaterial) = m.material;//データコピー
+		*((MaterialForHlsl*)mapMaterial) = m.materialForHlsl;//データコピー
 		mapMaterial += materialBuffSize;//次のアライメント位置まで進める
 	}
 	materialBuff->Unmap(0,nullptr);

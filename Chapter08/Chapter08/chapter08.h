@@ -12,6 +12,8 @@
 
 using namespace DirectX;
 
+
+// PMDファイルフォーマットのマテリアル構造体
 #pragma pack(1)
 struct PMDMaterial {
 	XMFLOAT3 diffuse;
@@ -27,32 +29,34 @@ struct PMDMaterial {
 };
 #pragma pack()
 
+
+// HLSL用マテリアル構造体
+struct MaterialForHlsl {
+	// ディフューズ
+	XMFLOAT3 diffuse;
+	float alpha;
+	// スペキュラー
+	XMFLOAT3 specular;
+	float specularity;
+	// アンビエント
+	XMFLOAT3 ambient;
+};
+
+
+// レンダリング用マテリアル構造体
+struct Material {
+	unsigned int indicesNum;
+	MaterialForHlsl materialForHlsl;
+};
+
+
+// PMDモデル構造体
 struct PMD_MODEL_08 {
 	std::vector<PMD_VERTEX> vertices;
 	std::vector<unsigned short> indices;
 	std::vector<PMDMaterial> materials;
 };
 
-//シェーダ側に投げられるマテリアルデータ
-struct MaterialForHlsl {
-	XMFLOAT3 diffuse; //ディフューズ色
-	float alpha; // ディフューズα
-	XMFLOAT3 specular; //スペキュラ色
-	float specularity;//スペキュラの強さ(乗算値)
-	XMFLOAT3 ambient; //アンビエント色
-};
-//それ以外のマテリアルデータ
-struct AdditionalMaterial {
-	std::string texPath;//テクスチャファイルパス
-	int toonIdx; //トゥーン番号
-	bool edgeFlg;//マテリアル毎の輪郭線フラグ
-};
-//まとめたもの
-struct Material {
-	unsigned int indicesNum;//インデックス数
-	MaterialForHlsl material;
-	AdditionalMaterial additional;
-};
 
 // PMDファイルのマテリアル情報を読み込む
 std::vector<PMDMaterial> readPmdMaterials(FILE* fp);
