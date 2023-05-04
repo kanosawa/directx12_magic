@@ -54,10 +54,18 @@ D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata) {
 }
 
 
-ID3D12Resource* createTexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES texHeapProperties, const DirectX::Image* img, TexMetadata metadata) {
+ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename) {
+
+	TexMetadata metadata = {};
+	ScratchImage scratchImg = {};
+	auto result = LoadFromWICFile(textureFilename, WIC_FLAGS_NONE, &metadata, scratchImg);
+	auto img = scratchImg.GetImage(0, 0, 0);
+
+	auto texHeapProperties = createTexHeapProperties();
 	auto texResourceDesc = createTexResourceDescriptor(metadata);
+
 	ID3D12Resource* texBuffer = nullptr;
-	auto result = dev->CreateCommittedResource(
+	result = dev->CreateCommittedResource(
 		&texHeapProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&texResourceDesc,
@@ -82,10 +90,9 @@ ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev) {
 }
 
 
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, DXGI_FORMAT format) {
+void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap) {
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
-	shaderResourceViewDesc.Format = format;
 	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;

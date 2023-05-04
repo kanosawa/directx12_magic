@@ -125,14 +125,9 @@ int main() {
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
 	// テクスチャ設定
-	TexMetadata metadata = {};
-	ScratchImage scratchImg = {};
-	result = LoadFromWICFile(L"textest.png", WIC_FLAGS_NONE, &metadata, scratchImg);
-	auto img = scratchImg.GetImage(0, 0, 0);
-	auto texHeapProperties = createTexHeapProperties();
-	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
+	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
 	auto texDescriptorHeap = createTexDescriptorHeap(dev);
-	createShaderResourceView(dev, texBuffer, texDescriptorHeap, metadata.format);
+	createShaderResourceView(dev, texBuffer, texDescriptorHeap);
 
 	auto fence = createFence(dev);
 	ShowWindow(hwnd, SW_SHOW);

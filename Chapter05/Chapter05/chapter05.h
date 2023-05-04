@@ -28,20 +28,14 @@ D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, st
 // インプットレイアウトを作成（TEXCOORD追加版）
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
 
-// テクスチャヒーププロパティを作成
-D3D12_HEAP_PROPERTIES createTexHeapProperties();
-
-// テクスチャリソースディスクリプタを作成
-D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata);
-
-// テクスチャバッファを作成
-ID3D12Resource* createTexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES texHeapProperties, const DirectX::Image* img, TexMetadata metadata);
+// テクスチャファイルを読み込み、バッファを作成
+ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename);
 
 // テクスチャディスクリプタヒープを作成（レンダーターゲットビューと同様に、シェーダーリソースビューの作成に必要）
 ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev);
 
 // シェーダーリソースビューを作成
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, DXGI_FORMAT format);
+void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap);
 
 // バリアを作成（排他制御のための仕組み）
 D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);
