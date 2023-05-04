@@ -11,6 +11,10 @@
 #include<d3dx12.h>
 #include<dxgidebug.h>
 #include "chapter03.h"
+#include "chapter04.h"
+#include "chapter05.h"
+#include "chapter06.h"
+#include "chapter07.h"
 
 
 #ifdef _DEBUG
@@ -25,18 +29,6 @@
 using namespace DirectX;
 using namespace std;
 
-#pragma pack(push, 1)
-struct PMD_VERTEX
-{
-	XMFLOAT3 pos;
-	XMFLOAT3 normal;
-	XMFLOAT2 uv;
-	uint16_t bone_no[2];
-	uint8_t  weight;
-	uint8_t  EdgeFlag;
-	uint16_t dummy;
-};
-#pragma pack(pop)
 
 ID3D12Device* dev = nullptr;
 IDXGIFactory6* dxgiFactory = nullptr;
@@ -502,30 +494,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	unsigned int indicesNum;//インデックス数
 	fread(&indicesNum, sizeof(indicesNum), 1, fp);//
 
-	//UPLOAD(確保は可能)
-	auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertices.size() * sizeof(PMD_VERTEX));
-	ID3D12Resource* vertBuff = nullptr;
-	result = dev->CreateCommittedResource(
-		&heapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&vertBuff));
-
-	PMD_VERTEX* vertMap = nullptr;
-	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
-	std::copy(vertices.begin(), vertices.end(), vertMap);
-	vertBuff->Unmap(0, nullptr);
-
-	D3D12_VERTEX_BUFFER_VIEW vbView = {};
-	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();//バッファの仮想アドレス
-	vbView.SizeInBytes = static_cast<UINT>(vertices.size() * sizeof(PMD_VERTEX));//全バイト数
-	vbView.StrideInBytes = sizeof(PMD_VERTEX);//1頂点あたりのバイト数
-
 	std::vector<unsigned short> indices(indicesNum);
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);//一気に読み込み
+
+
+
+	// Chapter04
+	auto vertexHeapProperties = createHeapProperties();
+	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
+	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
+	mapVertexBuffer(vertexBuffer, vertices);
+	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
+	auto indexHeapProperties = createHeapProperties();
+	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
+	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
+	mapIndexBuffer(indexBuffer, indices);
+	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
+	auto vertexShaderBlob = createVertexShaderBlob();
+	auto pixelShaderBlob = createPixelShaderBlob();
+	// auto rootSignature = createRootSignature(dev);
+	// auto inputLayout = createInputLayout();
+	// auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
+	auto viewport = createViewPort(windowWidth, windowHeight);
+	auto scissorRect = createScissorRect(windowWidth, windowHeight);
+
 
 	unsigned int materialNum;//マテリアル数
 	fread(&materialNum, sizeof(materialNum), 1, fp);
@@ -616,40 +608,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	}
 	fclose(fp);
-	
-
-
-
-	ID3D12Resource* idxBuff = nullptr;
-	//設定は、バッファのサイズ以外頂点バッファの設定を使いまわして
-	//OKだと思います。
-	heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	resDesc = CD3DX12_RESOURCE_DESC::Buffer(indices.size() * sizeof(indices[0]));
-	result = dev->CreateCommittedResource(
-		&heapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&idxBuff));
-
-	//作ったバッファにインデックスデータをコピー
-	unsigned short* mappedIdx = nullptr;
-	idxBuff->Map(0, nullptr, (void**)&mappedIdx);
-	std::copy(indices.begin(), indices.end(), mappedIdx);
-	idxBuff->Unmap(0, nullptr);
-
-	//インデックスバッファビューを作成
-	D3D12_INDEX_BUFFER_VIEW ibView = {};
-	ibView.BufferLocation = idxBuff->GetGPUVirtualAddress();
-	ibView.Format = DXGI_FORMAT_R16_UINT;
-	ibView.SizeInBytes = static_cast<UINT>(indices.size()*sizeof(indices[0]));
 
 	//マテリアルバッファを作成
 	auto materialBuffSize = sizeof(MaterialForHlsl);
 	materialBuffSize = (materialBuffSize + 0xff)&~0xff;
-	heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	resDesc = CD3DX12_RESOURCE_DESC::Buffer(materialBuffSize * materialNum);//勿体ないけど仕方ないですね
+	auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(materialBuffSize * materialNum);//勿体ないけど仕方ないですね
 	ID3D12Resource* materialBuff = nullptr;
 	result = dev->CreateCommittedResource(
 		&heapProp,
@@ -910,21 +874,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	gpipeline.pRootSignature = rootsignature;
 	ID3D12PipelineState* _pipelinestate = nullptr;
 	result = dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
-
-	D3D12_VIEWPORT viewport = {};
-	viewport.Width = windowWidth;//出力先の幅(ピクセル数)
-	viewport.Height = windowHeight;//出力先の高さ(ピクセル数)
-	viewport.TopLeftX = 0;//出力先の左上座標X
-	viewport.TopLeftY = 0;//出力先の左上座標Y
-	viewport.MaxDepth = 1.0f;//深度最大値
-	viewport.MinDepth = 0.0f;//深度最小値
-
-
-	D3D12_RECT scissorrect = {};
-	scissorrect.top = 0;//切り抜き上座標
-	scissorrect.left = 0;//切り抜き左座標
-	scissorrect.right = scissorrect.left + windowWidth;//切り抜き右座標
-	scissorrect.bottom = scissorrect.top + windowHeight;//切り抜き下座標
 	
 	//シェーダ側に渡すための基本的な環境データ
 	struct SceneData {
@@ -1026,11 +975,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
 
 		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorrect);
+		commandList->RSSetScissorRects(1, &scissorRect);
 		
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->IASetVertexBuffers(0, 1, &vbView);
-		commandList->IASetIndexBuffer(&ibView);
+		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+		commandList->IASetIndexBuffer(&indexBufferView);
 
 		commandList->SetGraphicsRootSignature(rootsignature);
 		
