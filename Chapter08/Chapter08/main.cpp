@@ -1,15 +1,5 @@
 //コンスタントバッファで行列を転送
-#include<Windows.h>
-#include<tchar.h>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<DirectXMath.h>
-#include<vector>
 #include<map>
-#include<d3dcompiler.h>
-#include<DirectXTex.h>
-#include<d3dx12.h>
-#include<dxgidebug.h>
 #include "chapter03.h"
 #include "chapter04.h"
 #include "chapter05.h"
@@ -18,10 +8,6 @@
 #include "chapter08.h"
 
 
-#ifdef _DEBUG
-#include<iostream>
-#endif
-
 #pragma comment(lib,"DirectXTex.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -29,6 +15,12 @@
 
 using namespace DirectX;
 using namespace std;
+
+struct PMDHeader {
+	float version;
+	char model_name[20];
+	char comment[256];
+};
 
 
 ID3D12Device* dev = nullptr;
@@ -323,84 +315,31 @@ void EnableDebugLayer() {
 }
 
 
-#ifdef _DEBUG
 int main() {
-#else
-#include<Windows.h>
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-#endif
 
-	//PMDヘッダ構造体
-	struct PMDHeader {
-		float version; //例：00 00 80 3F == 1.00
-		char model_name[20];//モデル名
-		char comment[256];//モデルコメント
-	};
-	char signature[3];
-	PMDHeader pmdheader = {};
-	//string strModelPath = "Model/hibiki/hibiki.pmd";
-	//string strModelPath = "Model/satori/satori.pmd";
-	//string strModelPath = "Model/reimu/reimu.pmd";
 	string strModelPath = "Model/巡音ルカ.pmd";
-	//string strModelPath = "Model/初音ミク.pmd";
 	FILE* fp;
 	fopen_s(&fp, strModelPath.c_str(), "rb");
+
+	char signature[3] = {};
+	PMDHeader pmdheader = {};
 	fread(signature, sizeof(signature), 1, fp);
 	fread(&pmdheader, sizeof(pmdheader), 1, fp);
 
-	unsigned int vertNum;//頂点数
+	unsigned int vertNum;
 	fread(&vertNum, sizeof(vertNum), 1, fp);
 
-
-#pragma pack(1)//ここから1バイトパッキング…アライメントは発生しない
-	//PMDマテリアル構造体
-	struct PMDMaterial {
-		XMFLOAT3 diffuse; //ディフューズ色
-		float alpha; // ディフューズα
-		float specularity;//スペキュラの強さ(乗算値)
-		XMFLOAT3 specular; //スペキュラ色
-		XMFLOAT3 ambient; //アンビエント色
-		unsigned char toonIdx; //トゥーン番号(後述)
-		unsigned char edgeFlg;//マテリアル毎の輪郭線フラグ
-		//2バイトのパディングが発生！！
-		unsigned int indicesNum; //このマテリアルが割り当たるインデックス数
-		char texFilePath[20]; //テクスチャファイル名(プラスアルファ…後述)
-	};//70バイトのはず…でもパディングが発生するため72バイト
-#pragma pack()//1バイトパッキング解除
-
-	//シェーダ側に投げられるマテリアルデータ
-	struct MaterialForHlsl {
-		XMFLOAT3 diffuse; //ディフューズ色
-		float alpha; // ディフューズα
-		XMFLOAT3 specular; //スペキュラ色
-		float specularity;//スペキュラの強さ(乗算値)
-		XMFLOAT3 ambient; //アンビエント色
-	};
-	//それ以外のマテリアルデータ
-	struct AdditionalMaterial {
-		std::string texPath;//テクスチャファイルパス
-		int toonIdx; //トゥーン番号
-		bool edgeFlg;//マテリアル毎の輪郭線フラグ
-	};
-	//まとめたもの
-	struct Material {
-		unsigned int indicesNum;//インデックス数
-		MaterialForHlsl material;
-		AdditionalMaterial additional;
-	};
-
-	constexpr unsigned int pmdvertex_size = 38;//頂点1つあたりのサイズ
-	std::vector<PMD_VERTEX> vertices(vertNum);//バッファ確保
-	for (auto i = 0; i < vertNum; i++)
-	{
+	size_t pmdvertex_size = 38;
+	std::vector<PMD_VERTEX> vertices(vertNum);
+	for (auto i = 0; i < vertNum; i++) {
 		fread(&vertices[i], pmdvertex_size, 1, fp);
 	}
 
-	unsigned int indicesNum;//インデックス数
-	fread(&indicesNum, sizeof(indicesNum), 1, fp);//
+	unsigned int indicesNum;
+	fread(&indicesNum, sizeof(indicesNum), 1, fp);
 
 	std::vector<unsigned short> indices(indicesNum);
-	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);//一気に読み込み
+	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
 
 	const unsigned int windowWidth = 1280;
 	const unsigned int windowHeight = 720;
