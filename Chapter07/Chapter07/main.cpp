@@ -12,9 +12,6 @@ using namespace DirectX;
 #pragma comment(lib, "DirectXTex.lib")
 
 
-
-
-
 void main() {
 
 	auto result = CoInitializeEx(0, COINIT_MULTITHREADED);

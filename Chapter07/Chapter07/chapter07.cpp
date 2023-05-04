@@ -2,36 +2,45 @@
 #include "chapter07.h"
 
 
+void readPmdHeader(FILE* fp) {
+	char signature[3] = {};
+	PMDHeader pmdheader = {};
+	fread(signature, sizeof(signature), 1, fp);
+	fread(&pmdheader, sizeof(pmdheader), 1, fp);
+}
+
+
+std::vector<PMD_VERTEX> readPmdVertices(FILE* fp) {
+	size_t pmdvertex_size = 38;
+	unsigned int vertNum;
+	fread(&vertNum, sizeof(vertNum), 1, fp);
+	std::vector<PMD_VERTEX> vertices(vertNum);
+	for (auto i = 0; i < vertNum; i++) {
+		fread(&vertices[i], pmdvertex_size, 1, fp);
+	}
+	return vertices;
+}
+
+
+std::vector<unsigned short> readPmdIndices(FILE* fp) {
+	unsigned int indicesNum;
+	fread(&indicesNum, sizeof(indicesNum), 1, fp);
+	std::vector<unsigned short> indices(indicesNum);
+	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
+	return indices;
+}
+
+
 PMD_MODEL_07 readPmdFile(std::string pmdFileName) {
 
 	FILE* fp;
 	fopen_s(&fp, pmdFileName.c_str(), "rb");
 
-	char signature[3] = {};
-	PMDHeader pmdheader = {};
-	fread(signature, sizeof(signature), 1, fp);
-	fread(&pmdheader, sizeof(pmdheader), 1, fp);
-
-	unsigned int vertNum;
-	fread(&vertNum, sizeof(vertNum), 1, fp);
-
-	size_t pmdvertex_size = 38;
-	std::vector<PMD_VERTEX> vertices(vertNum);
-	for (auto i = 0; i < vertNum; i++) {
-		fread(&vertices[i], pmdvertex_size, 1, fp);
-	}
-
-	unsigned int indicesNum;
-	fread(&indicesNum, sizeof(indicesNum), 1, fp);
-
-	std::vector<unsigned short> indices(indicesNum);
-	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
-
-	fclose(fp);
-
 	PMD_MODEL_07 pmd_model = {};
-	pmd_model.vertices = vertices;
-	pmd_model.indices = indices;
+	readPmdHeader(fp);
+	pmd_model.vertices = readPmdVertices(fp);
+	pmd_model.indices = readPmdIndices(fp);
+	fclose(fp);
 
 	return pmd_model;
 }
