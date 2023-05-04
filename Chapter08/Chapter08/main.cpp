@@ -798,6 +798,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12PipelineState* _pipelinestate = nullptr;
 	result = dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
 	
+
+
+	// Chapter05, 06
+	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
+	auto constBuffer = createConstBuffer(dev);
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
+
+
+
 	//シェーダ側に渡すための基本的な環境データ
 	struct SceneData {
 		XMMATRIX world;//ワールド行列
@@ -811,52 +820,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	XMFLOAT3 eye(0, 15, -15);
 	XMFLOAT3 target(0, 15, 0);
 	XMFLOAT3 up(0, 1, 0);
-	auto viewMat=XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-	auto projMat=XMMatrixPerspectiveFovLH(XM_PIDIV4,//画角は45°
+	auto viewMat = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+	auto projMat = XMMatrixPerspectiveFovLH(XM_PIDIV4,//画角は45°
 		static_cast<float>(windowWidth) / static_cast<float>(windowHeight),//アス比
 		1.0f,//近い方
 		100.0f//遠い方
 	);
-	ID3D12Resource* constBuff = nullptr;
-	heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	resDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(SceneData) + 0xff) & ~0xff);
-	result = dev->CreateCommittedResource(
-		&heapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&constBuff)
-	);
 
 	SceneData* mapScene=nullptr;//マップ先を示すポインタ
-	result = constBuff->Map(0,nullptr,(void**)&mapScene);//マップ
+	result = constBuffer->Map(0,nullptr,(void**)&mapScene);//マップ
 	//行列の内容をコピー
 	mapScene->world = worldMat;
 	mapScene->view= viewMat;
 	mapScene->proj = projMat;
 	mapScene->eye = eye;
-	ID3D12DescriptorHeap* basicDescHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//シェーダから見えるように
-	descHeapDesc.NodeMask = 0;//マスクは0
-	descHeapDesc.NumDescriptors = 1;//
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//デスクリプタヒープ種別
-	result = dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&basicDescHeap));//生成
 
-	////デスクリプタの先頭ハンドルを取得しておく
-	auto basicHeapHandle=basicDescHeap->GetCPUDescriptorHandleForHeapStart();
 
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-	cbvDesc.BufferLocation = constBuff->GetGPUVirtualAddress();
-	cbvDesc.SizeInBytes = static_cast<UINT>(constBuff->GetDesc().Width);
-	//定数バッファビューの作成
-	dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 
 	MSG msg = {};
 	unsigned int frame = 0;
 	float angle = 0.0f;
-	// auto dsvH = dsvHeap->GetCPUDescriptorHandleForHeapStart();
 	auto dsvH = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	while (true) {
 		worldMat=XMMatrixRotationY(angle);
@@ -878,7 +861,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//バックバッファのインデックスを取得
 		auto bbIdx = swapChain->GetCurrentBackBufferIndex();
 
-		// auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(_backBuffers[bbIdx],
 		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers[bbIdx],
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		commandList->ResourceBarrier(1, &barrier);
@@ -887,7 +869,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		//レンダーターゲットを指定
-		// auto rtvH = rtvHeaps->GetCPUDescriptorHandleForHeapStart
 		auto rtvH = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		rtvH.ptr += static_cast<ULONG_PTR>(bbIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
 		
@@ -908,8 +889,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootSignature(rootsignature);
 		
 		//WVP変換行列
-		commandList->SetDescriptorHeaps(1, &basicDescHeap);
-		commandList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
+		commandList->SetDescriptorHeaps(1, &basicDescriptorHeap);
+		commandList->SetGraphicsRootDescriptorTable(0, basicDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 		//マテリアル
 		commandList->SetDescriptorHeaps(1, &materialDescHeap);
@@ -925,7 +906,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			idxOffset += m.indicesNum;			
 		}
 
-		// barrier = CD3DX12_RESOURCE_BARRIER::Transition(_backBuffers[bbIdx],
 		barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers[bbIdx],
 			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		commandList->ResourceBarrier(1, &barrier);
