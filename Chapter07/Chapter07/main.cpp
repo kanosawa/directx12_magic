@@ -42,8 +42,10 @@ void main() {
 	fread(&vertNum, sizeof(vertNum), 1, fp);
 
 	size_t pmdvertex_size = 38;
-	std::vector<unsigned char> vertices(vertNum * pmdvertex_size);
-	fread(vertices.data(), vertices.size(), 1, fp);
+	std::vector<PMD_VERTEX> vertices(vertNum);
+	for (auto i = 0; i < vertNum; i++) {
+		fread(&vertices[i], pmdvertex_size, 1, fp);
+	}
 
 	unsigned int indicesNum;
 	fread(&indicesNum, sizeof(indicesNum), 1, fp);
@@ -75,7 +77,7 @@ void main() {
 	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
 	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
 	mapVertexBuffer(vertexBuffer, vertices);
-	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices, pmdvertex_size);
+	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
 	auto indexHeapProperties = createHeapProperties();
 	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
 	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
