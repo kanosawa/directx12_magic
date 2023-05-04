@@ -31,7 +31,7 @@ std::vector<unsigned short> readPmdIndices(FILE* fp) {
 }
 
 
-PMD_MODEL_07 readPmdFile(std::string pmdFileName) {
+PMD_MODEL_07 readPmdFile07(std::string pmdFileName) {
 
 	FILE* fp;
 	fopen_s(&fp, pmdFileName.c_str(), "rb");

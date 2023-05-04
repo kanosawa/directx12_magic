@@ -32,7 +32,7 @@ void main() {
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 
 	// PMDファイルの読み込み
-	auto pmdModel = readPmdFile("model/初音ミク.pmd");
+	auto pmdModel = readPmdFile07("model/初音ミク.pmd");
 	auto vertices = pmdModel.vertices;
 	auto indices = pmdModel.indices;
 

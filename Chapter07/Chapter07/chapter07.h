@@ -50,7 +50,7 @@ std::vector<PMD_VERTEX> readPmdVertices(FILE* fp);
 std::vector<unsigned short> readPmdIndices(FILE* fp);
 
 // PMDファイルを読み込む
-PMD_MODEL_07 readPmdFile(std::string pmdFileName);
+PMD_MODEL_07 readPmdFile07(std::string pmdFileName);
 
 // 頂点バッファをマップ（PMDファイル版）
 void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices);
