@@ -28,15 +28,6 @@ struct PMDHeader {
 	char comment[256];
 };
 
-struct PMDVertex {
-	XMFLOAT3 pos;
-	XMFLOAT3 normal;
-	XMFLOAT2 uv;
-	unsigned short boneNo[2];
-	unsigned char boneWeight;
-	unsigned char edgeFlg;
-};
-
 
 void main() {
 
