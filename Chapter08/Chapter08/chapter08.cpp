@@ -28,6 +28,21 @@ PMD_MODEL_08 readPmdFile08(std::string pmdFileName) {
 }
 
 
+std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials) {
+	std::vector<Material> materials(pmdMaterials.size());
+	for (int i = 0; i < pmdMaterials.size(); ++i) {
+		materials[i].indicesNum = pmdMaterials[i].indicesNum;
+		materials[i].materialForHlsl.diffuse = pmdMaterials[i].diffuse;
+		materials[i].materialForHlsl.alpha = pmdMaterials[i].alpha;
+		materials[i].materialForHlsl.specular = pmdMaterials[i].specular;
+		materials[i].materialForHlsl.specularity = pmdMaterials[i].specularity;
+		materials[i].materialForHlsl.ambient = pmdMaterials[i].ambient;
+	}
+	return materials;
+}
+
+
+
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）

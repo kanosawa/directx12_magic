@@ -64,5 +64,8 @@ std::vector<PMDMaterial> readPmdMaterials(FILE* fp);
 // PMDファイルを読み込む（マテリアル追加版）
 PMD_MODEL_08 readPmdFile08(std::string pmdFileName);
 
+// PMDMaterialからMaterialへマテリアル情報をコピー
+std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials);
+
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

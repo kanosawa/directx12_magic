@@ -356,88 +356,76 @@ int main() {
 	auto pmdMaterials = pmdModel.materials;
 	auto materialNum = pmdMaterials.size();
 
-	std::vector<Material> materials(materialNum);
-
 	vector<ID3D12Resource*> textureResources(materialNum);
 	vector<ID3D12Resource*> sphResources(materialNum);
 	vector<ID3D12Resource*> spaResources(materialNum);
 	vector<ID3D12Resource*> toonResources(materialNum);
-	{
-		
-		for (int i = 0; i < pmdMaterials.size(); ++i) {
-			materials[i].indicesNum = pmdMaterials[i].indicesNum;
-			materials[i].materialForHlsl.diffuse = pmdMaterials[i].diffuse;
-			materials[i].materialForHlsl.alpha = pmdMaterials[i].alpha;
-			materials[i].materialForHlsl.specular = pmdMaterials[i].specular;
-			materials[i].materialForHlsl.specularity = pmdMaterials[i].specularity;
-			materials[i].materialForHlsl.ambient = pmdMaterials[i].ambient;
+
+	auto materials = copyMaterials(pmdMaterials);
+
+	for (int i = 0; i < pmdMaterials.size(); ++i) {
+		//トゥーンリソースの読み込み
+		string toonFilePath = "toon/";
+		char toonFileName[16];
+		sprintf_s(toonFileName, 16, "toon%02d.bmp", pmdMaterials[i].toonIdx + 1);
+		toonFilePath += toonFileName;
+		toonResources[i] = LoadTextureFromFile(toonFilePath);
+
+		if (strlen(pmdMaterials[i].texFilePath) == 0) {
+			textureResources[i] = nullptr;
+			continue;
 		}
 
-		for (int i = 0; i < pmdMaterials.size(); ++i) {
-			//トゥーンリソースの読み込み
-			string toonFilePath = "toon/";
-			char toonFileName[16];
-			sprintf_s(toonFileName, 16, "toon%02d.bmp", pmdMaterials[i].toonIdx + 1);
-			toonFilePath += toonFileName;
-			toonResources[i] = LoadTextureFromFile(toonFilePath);
-
-			if (strlen(pmdMaterials[i].texFilePath) == 0) {
-				textureResources[i] = nullptr;
-				continue;
+		string texFileName = pmdMaterials[i].texFilePath;
+		string sphFileName = "";
+		string spaFileName = "";
+		if (count(texFileName.begin(), texFileName.end(), '*') > 0) {//スプリッタがある
+			auto namepair = SplitFileName(texFileName);
+			if (GetExtension(namepair.first) == "sph") {
+				texFileName = string("model/") + namepair.second;
+				sphFileName = string("model/") + namepair.first;
 			}
-
-			string texFileName = pmdMaterials[i].texFilePath;
-			string sphFileName = "";
-			string spaFileName = "";
-			if (count(texFileName.begin(), texFileName.end(), '*') > 0) {//スプリッタがある
-				auto namepair = SplitFileName(texFileName);
-				if (GetExtension(namepair.first) == "sph") {
-					texFileName = string("model/") + namepair.second;
-					sphFileName = string("model/") + namepair.first;
-				}
-				else if (GetExtension(namepair.first) == "spa") {
-					texFileName = string("model/") + namepair.second;
-					spaFileName = string("model/") + namepair.first;
-				}
-				else {
-					texFileName = namepair.first;
-					if (GetExtension(namepair.second) == "sph") {
-						sphFileName = string("model/") + namepair.second;
-					}
-					else if (GetExtension(namepair.second) == "spa") {
-						spaFileName = string("model/") + namepair.second;
-					}
-				}
+			else if (GetExtension(namepair.first) == "spa") {
+				texFileName = string("model/") + namepair.second;
+				spaFileName = string("model/") + namepair.first;
 			}
 			else {
-				if (GetExtension(pmdMaterials[i].texFilePath) == "sph") {
-					sphFileName = string("model/") + pmdMaterials[i].texFilePath;
-					texFileName = "";
+				texFileName = namepair.first;
+				if (GetExtension(namepair.second) == "sph") {
+					sphFileName = string("model/") + namepair.second;
 				}
-				else if (GetExtension(pmdMaterials[i].texFilePath) == "spa") {
-					spaFileName = string("model/") + pmdMaterials[i].texFilePath;
-					texFileName = "";
-				}
-				else {
-					texFileName = string("model/") + pmdMaterials[i].texFilePath;
+				else if (GetExtension(namepair.second) == "spa") {
+					spaFileName = string("model/") + namepair.second;
 				}
 			}
-			//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
-			if (texFileName != "") {
-				auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
-				textureResources[i] = LoadTextureFromFile(texFilePath);
-			}
-			if (sphFileName != "") {
-				auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
-				sphResources[i] = LoadTextureFromFile(sphFilePath);
-			}
-			if (spaFileName != "") {
-				auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
-				spaResources[i] = LoadTextureFromFile(spaFilePath);
-			}
-
-
 		}
+		else {
+			if (GetExtension(pmdMaterials[i].texFilePath) == "sph") {
+				sphFileName = string("model/") + pmdMaterials[i].texFilePath;
+				texFileName = "";
+			}
+			else if (GetExtension(pmdMaterials[i].texFilePath) == "spa") {
+				spaFileName = string("model/") + pmdMaterials[i].texFilePath;
+				texFileName = "";
+			}
+			else {
+				texFileName = string("model/") + pmdMaterials[i].texFilePath;
+			}
+		}
+		//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
+		if (texFileName != "") {
+			auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
+			textureResources[i] = LoadTextureFromFile(texFilePath);
+		}
+		if (sphFileName != "") {
+			auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
+			sphResources[i] = LoadTextureFromFile(sphFilePath);
+		}
+		if (spaFileName != "") {
+			auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
+			spaResources[i] = LoadTextureFromFile(spaFilePath);
+		}
+
 
 	}
 	
