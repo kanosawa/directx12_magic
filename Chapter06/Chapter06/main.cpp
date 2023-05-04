@@ -60,15 +60,10 @@ void main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// Chapter05
-	TexMetadata metadata = {};
-	ScratchImage scratchImg = {};
-	result = LoadFromWICFile(L"textest.png", WIC_FLAGS_NONE, &metadata, scratchImg);
-	auto img = scratchImg.GetImage(0, 0, 0);
-	auto texHeapProperties = createTexHeapProperties();
-	auto texBuffer = createTexBuffer(dev, texHeapProperties, img, metadata);
+	// Chapter05（TexDescriptorHeapをBasicDescriptorHeapに変更）
+	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
 	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
-	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, metadata.format);
+	createShaderResourceView(dev, texBuffer, basicDescriptorHeap);
 
 	// 定数バッファ
 	auto constBuffer = createConstBuffer(dev);
