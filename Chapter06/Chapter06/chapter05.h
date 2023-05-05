@@ -37,8 +37,8 @@ D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata);
 // テクスチャファイルを読み込み、バッファを作成
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename);
 
-// テクスチャディスクリプタヒープを作成（レンダーターゲットビューと同様に、シェーダーリソースビューの作成に必要）
-ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev);
+// ディスクリプタヒープを作成
+ID3D12DescriptorHeap* createCbvSrvUavDescriptorHeap(ID3D12Device* dev, UINT64 numDescriptors);
 
 // シェーダーリソースビューを作成
 void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, UINT64 idx);

@@ -122,7 +122,7 @@ int main() {
 
 	// テクスチャ設定
 	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
-	auto texDescriptorHeap = createTexDescriptorHeap(dev);
+	auto texDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 1);
 	createShaderResourceView(dev, texBuffer, texDescriptorHeap, 0);
 
 	auto fence = createFence(dev);

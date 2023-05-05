@@ -78,12 +78,12 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* tex
 }
 
 
-ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev) {
+ID3D12DescriptorHeap* createCbvSrvUavDescriptorHeap(ID3D12Device* dev, UINT64 numDescriptors) {
 	ID3D12DescriptorHeap* texDescHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC texDescHeapDesc = {};
 	texDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	texDescHeapDesc.NodeMask = 0;
-	texDescHeapDesc.NumDescriptors = 1;
+	texDescHeapDesc.NumDescriptors = numDescriptors;
 	texDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	auto result = dev->CreateDescriptorHeap(&texDescHeapDesc, IID_PPV_ARGS(&texDescHeap));
 	return texDescHeap;

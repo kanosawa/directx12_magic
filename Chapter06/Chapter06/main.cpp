@@ -58,7 +58,7 @@ void main() {
 
 	// Chapter05（TexDescriptorHeapをBasicDescriptorHeapに変更）
 	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
-	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
+	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2);
 	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, 0);
 
 	// 定数バッファ

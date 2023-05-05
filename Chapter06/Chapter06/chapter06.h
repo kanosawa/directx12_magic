@@ -14,9 +14,6 @@
 using namespace DirectX;
 
 
-// テクスチャと定数用のディスクリプタヒープを作成
-ID3D12DescriptorHeap* createBasicDescriptorHeap(ID3D12Device* dev, UINT64 numDescriptors);
-
 // 定数バッファを作成
 ID3D12Resource* createConstBuffer(ID3D12Device* dev);
 
