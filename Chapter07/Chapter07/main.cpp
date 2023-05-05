@@ -37,14 +37,10 @@ void main() {
 	auto indices = pmdModel.indices;
 
 	// Chapter04
-	auto vertexHeapProperties = createHeapProperties();
-	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
-	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
+	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
 	mapVertexBuffer(vertexBuffer, vertices);
 	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
-	auto indexHeapProperties = createHeapProperties();
-	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
-	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
+	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
@@ -56,7 +52,7 @@ void main() {
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
 	// Chapter05, 06
-	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2); // テクスチャは無く、定数のみだが、Chapter06との処理共通化のためにnumDescriptor=2としておく
+	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2); // テクスチャは無く、定数のみだが、ルートシグネチャをChapter06と共通化するためにnumDescriptor=2としておく
 	auto constBuffer = createConstBuffer(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1); // 上記同様、ShaderResourceViewがある想定で、idx=1としている
 

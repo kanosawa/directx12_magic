@@ -1,17 +1,6 @@
 #include "chapter06.h"
 
 
-ID3D12DescriptorHeap* createBasicDescriptorHeap(ID3D12Device* dev, UINT64 numDescriptors) {
-	ID3D12DescriptorHeap* basicDescriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC basicDescriptorHeapDesc = {};
-	basicDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	basicDescriptorHeapDesc.NodeMask = 0;
-	basicDescriptorHeapDesc.NumDescriptors = numDescriptors;
-	basicDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	auto result = dev->CreateDescriptorHeap(&basicDescriptorHeapDesc, IID_PPV_ARGS(&basicDescriptorHeap));
-	return basicDescriptorHeap;
-}
-
 /*
 ID3D12Resource* createConstBuffer(ID3D12Device* dev) {
 	ID3D12Resource* constBuffer = nullptr;
