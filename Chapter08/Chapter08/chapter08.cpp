@@ -223,6 +223,18 @@ ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize) {
 }
 
 
+void mapMaterialBuffer(ID3D12Resource* materialBuffer, std::vector<Material> materials) {
+	char* mapMaterial = nullptr;
+	auto result = materialBuffer->Map(0, nullptr, (void**)&mapMaterial);
+	auto materialBuffSize = (sizeof(MaterialForHlsl) + 0xff) & ~0xff;
+	for (auto& m : materials) {
+		*((MaterialForHlsl*)mapMaterial) = m.materialForHlsl;
+		mapMaterial += materialBuffSize;
+	}
+	materialBuffer->Unmap(0, nullptr);
+}
+
+
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）

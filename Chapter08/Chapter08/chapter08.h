@@ -105,5 +105,8 @@ void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resour
 // マテリアルバッファを作成
 ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize);
 
+// マテリアルバッファをマップ
+void mapMaterialBuffer(ID3D12Resource* materialBuffer, std::vector<Material> materials);
+
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

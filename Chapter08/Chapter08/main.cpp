@@ -209,7 +209,7 @@ int main() {
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
 	// Chapter05, 06
-	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2);
+	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 1);
 	auto constBuffer = createConstBuffer(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
 
@@ -228,25 +228,9 @@ int main() {
 
 	auto materialBuffSize = (sizeof(MaterialForHlsl) + 0xff) & ~0xff;
 	auto materialBuffer = createMaterialBuffer(dev, materialBuffSize * materials.size());
-	
-	//マップマテリアルにコピー
-	char* mapMaterial = nullptr;
-	result = materialBuffer->Map(0, nullptr, (void**)&mapMaterial);
-	for (auto& m : materials) {
-		*((MaterialForHlsl*)mapMaterial) = m.materialForHlsl;//データコピー
-		mapMaterial += materialBuffSize;//次のアライメント位置まで進める
-	}
-	materialBuffer->Unmap(0,nullptr);
+	mapMaterialBuffer(materialBuffer, materials);
 
-
-	ID3D12DescriptorHeap* materialDescHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC materialDescHeapDesc = {};
-	materialDescHeapDesc.NumDescriptors = materialNum * 5;//マテリアル数ぶん(定数1つ、テクスチャ3つ)
-	materialDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	materialDescHeapDesc.NodeMask = 0;
-	
-	materialDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;//デスクリプタヒープ種別
-	result = dev->CreateDescriptorHeap(&materialDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));//生成
+	auto materialDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, materialNum * 5);
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC matCBVDesc = {};
 	matCBVDesc.BufferLocation = materialBuffer->GetGPUVirtualAddress();
@@ -258,7 +242,7 @@ int main() {
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = 1;//ミップマップは使用しないので1
 
-	auto matDescHeapH = materialDescHeap->GetCPUDescriptorHandleForHeapStart();
+	auto matDescHeapH = materialDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	auto incSize= dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	for (size_t i = 0; i < materialNum; ++i) {
 		//マテリアル固定バッファビュー
@@ -396,9 +380,9 @@ int main() {
 		commandList->SetGraphicsRootDescriptorTable(0, basicDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 		//マテリアル
-		commandList->SetDescriptorHeaps(1, &materialDescHeap);
+		commandList->SetDescriptorHeaps(1, &materialDescriptorHeap);
 
-		auto materialH = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+		auto materialH = materialDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 		unsigned int idxOffset = 0;
 
 		auto cbvsrvIncSize= dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)*5;
