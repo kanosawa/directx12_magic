@@ -194,14 +194,10 @@ int main() {
 	auto textureResources = createTextureResources(dev, materials, strModelPath);
 
 	// Chapter04
-	auto vertexHeapProperties = createHeapProperties();
-	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
-	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
+	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
 	mapVertexBuffer(vertexBuffer, vertices);
 	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
-	auto indexHeapProperties = createHeapProperties();
-	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
-	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
+	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
@@ -213,7 +209,7 @@ int main() {
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
 	// Chapter05, 06
-	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
+	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2);
 	auto constBuffer = createConstBuffer(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
 
@@ -230,29 +226,17 @@ int main() {
 	auto blackTex = CreateBlackTexture();
 	auto gradTex = CreateGrayGradationTexture();
 
-	//マテリアルバッファを作成
-	auto materialBuffSize = sizeof(MaterialForHlsl);
-	materialBuffSize = (materialBuffSize + 0xff)&~0xff;
-	auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(materialBuffSize * materialNum);//勿体ないけど仕方ないですね
-	ID3D12Resource* materialBuff = nullptr;
-	result = dev->CreateCommittedResource(
-		&heapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&materialBuff)
-	);
-
+	auto materialBuffSize = (sizeof(MaterialForHlsl) + 0xff) & ~0xff;
+	auto materialBuffer = createMaterialBuffer(dev, materialBuffSize * materials.size());
+	
 	//マップマテリアルにコピー
 	char* mapMaterial = nullptr;
-	result = materialBuff->Map(0, nullptr, (void**)&mapMaterial);
+	result = materialBuffer->Map(0, nullptr, (void**)&mapMaterial);
 	for (auto& m : materials) {
 		*((MaterialForHlsl*)mapMaterial) = m.materialForHlsl;//データコピー
 		mapMaterial += materialBuffSize;//次のアライメント位置まで進める
 	}
-	materialBuff->Unmap(0,nullptr);
+	materialBuffer->Unmap(0,nullptr);
 
 
 	ID3D12DescriptorHeap* materialDescHeap = nullptr;
@@ -265,7 +249,7 @@ int main() {
 	result = dev->CreateDescriptorHeap(&materialDescHeapDesc, IID_PPV_ARGS(&materialDescHeap));//生成
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC matCBVDesc = {};
-	matCBVDesc.BufferLocation = materialBuff->GetGPUVirtualAddress();
+	matCBVDesc.BufferLocation = materialBuffer->GetGPUVirtualAddress();
 	matCBVDesc.SizeInBytes = static_cast<UINT>(materialBuffSize);
 
 	////通常テクスチャビュー作成

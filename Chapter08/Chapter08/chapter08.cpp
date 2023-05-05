@@ -1,5 +1,6 @@
 #include <functional>
 #include <map>
+#include "chapter04.h"
 #include "chapter05.h"
 #include "chapter08.h"
 
@@ -213,6 +214,12 @@ TextureResources createTextureResources(ID3D12Device* dev, std::vector<Material>
 	}
 
 	return textureResources;
+}
+
+
+ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize) {
+	// 頂点バッファの処理を流用
+	return createVertexBuffer(dev, datasize);
 }
 
 

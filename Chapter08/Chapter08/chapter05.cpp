@@ -53,7 +53,7 @@ D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata) {
 	return texResourceDesc;
 }
 
-/*
+
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename) {
 
 	TexMetadata metadata = {};
@@ -76,28 +76,28 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* tex
 	result = texBuffer->WriteToSubresource(0, nullptr, img->pixels, img->rowPitch, img->slicePitch);
 	return texBuffer;
 }
-*/
 
-ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev) {
+
+ID3D12DescriptorHeap* createCbvSrvUavDescriptorHeap(ID3D12Device* dev, UINT64 numDescriptors) {
 	ID3D12DescriptorHeap* texDescHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC texDescHeapDesc = {};
 	texDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	texDescHeapDesc.NodeMask = 0;
-	texDescHeapDesc.NumDescriptors = 1;
+	texDescHeapDesc.NumDescriptors = numDescriptors;
 	texDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	auto result = dev->CreateDescriptorHeap(&texDescHeapDesc, IID_PPV_ARGS(&texDescHeap));
 	return texDescHeap;
 }
 
 
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap) {
-
+void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* textureDescriptorHeap, UINT64 idx) {
 	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
 	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	dev->CreateShaderResourceView(texBuffer, &shaderResourceViewDesc, texDescHeap->GetCPUDescriptorHandleForHeapStart());
+	auto heapHandle = textureDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * idx;
+	dev->CreateShaderResourceView(texBuffer, &shaderResourceViewDesc, heapHandle);
 }
 
 

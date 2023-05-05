@@ -102,5 +102,8 @@ TextureResources createTextureResources(ID3D12Device* dev, std::vector<Material>
 // トゥーン以外のテクスチャファイルを読み込む
 void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, TextureResources& textureResources, int material_idx, std::string texFileName, std::string modelPath);
 
+// マテリアルバッファを作成
+ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize);
+
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
