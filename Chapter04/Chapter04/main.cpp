@@ -12,10 +12,10 @@ int main() {
 	const unsigned int windowHeight = 720;
 
 	std::vector<XMFLOAT3> vertices = {
-		{-0.4f, -0.7f, 0.0f} , // ç∂â∫
-		{-0.4f, 0.7f,  0.0f} , // ç∂è„
-		{0.4f,  -0.7f, 0.0f} , // âEâ∫
-		{0.4f,  0.7f,  0.0f} , // âEè„
+		{-0.4f, -0.7f, 0.0f} , // Â∑¶‰∏ã
+		{-0.4f, 0.7f,  0.0f} , // Â∑¶‰∏ä
+		{0.4f,  -0.7f, 0.0f} , // Âè≥‰∏ã
+		{0.4f,  0.7f,  0.0f} , // Âè≥‰∏ä
 	};
 	std::vector<unsigned short> indices = { 0,1,2, 2,1,3 };
 
@@ -31,21 +31,21 @@ int main() {
 	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 	
-	// í∏ì_ç¿ïW
+	// È†ÇÁÇπÂ∫ßÊ®ô
 	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
 	mapVertexBuffer(vertexBuffer, vertices);
 	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
 
-	// ÉCÉìÉfÉbÉNÉX
+	// „Ç§„É≥„Éá„ÉÉ„ÇØ„Çπ
 	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 
-	// ÉVÉFÅ[É_Å[
+	// „Ç∑„Çß„Éº„ÉÄ„Éº
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
 
-	// ÉpÉCÉvÉâÉCÉì
+	// „Éë„Ç§„Éó„É©„Ç§„É≥
 	auto rootSignature = createRootSignature(dev);
 	auto inputLayout = createInputLayout04();
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
@@ -71,7 +71,7 @@ int main() {
 		ID3D12CommandList* constCommandList[] = { commandList };
 		commandQueue->ExecuteCommandLists(1, constCommandList);
 
-		// ÉåÉìÉ_ÉäÉìÉOäÆóπë“Çø
+		// „É¨„É≥„ÉÄ„É™„É≥„Ç∞ÂÆå‰∫ÜÂæÖ„Å°
 		commandQueue->Signal(fence, ++fenceVal);
 		auto event = CreateEvent(nullptr, false, false, nullptr);
 		fence->SetEventOnCompletion(fenceVal, event);

@@ -105,21 +105,21 @@ void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D
 
 ID3D12RootSignature* createRootSignature05(ID3D12Device* dev) {
 
-	// ƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹ƒŒƒ“ƒWi•¡”‚ÌƒfƒBƒXƒNƒŠƒvƒ^‚ð‚Ü‚Æ‚ß‚ÄŽg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é‚½‚ß‚ÌŽd‘g‚Ýj
+	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ãƒ¬ãƒ³ã‚¸ï¼ˆè¤‡æ•°ã®ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ã‚’ã¾ã¨ã‚ã¦ä½¿ç”¨ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
 	D3D12_DESCRIPTOR_RANGE descTableRange = {};
 	descTableRange.NumDescriptors = 1;
 	descTableRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descTableRange.BaseShaderRegister = 0;
 	descTableRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// ƒ‹[ƒgƒpƒ‰ƒ[ƒ^[iƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹‚ÌŽÀ‘ÌBƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹‚ÍƒeƒNƒXƒ`ƒƒ‚È‚Ç‚ðCPU/GPU‚Å‹¤’Ê”FŽ¯‚·‚é‚½‚ß‚ÌŽd‘g‚Ýj
+	// ãƒ«ãƒ¼ãƒˆãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ï¼ˆãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ã®å®Ÿä½“ã€‚ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ã¯ãƒ†ã‚¯ã‚¹ãƒãƒ£ãªã©ã‚’CPU/GPUã§å…±é€šèªè­˜ã™ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
 	D3D12_ROOT_PARAMETER rootParam = {};
 	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParam.DescriptorTable.pDescriptorRanges = &descTableRange;
 	rootParam.DescriptorTable.NumDescriptorRanges = 1;
 
-	// ƒTƒ“ƒvƒ‰[iuv’l‚É‚æ‚Á‚ÄƒeƒNƒXƒ`ƒƒƒf[ƒ^‚©‚ç‚Ç‚¤F‚ðŽæ‚èo‚·‚©‚ðŒˆ‚ß‚é‚½‚ß‚ÌÝ’èj
+	// ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼ˆuvå€¤ã«ã‚ˆã£ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ã©ã†è‰²ã‚’å–ã‚Šå‡ºã™ã‹ã‚’æ±ºã‚ã‚‹ãŸã‚ã®è¨­å®šï¼‰
 	D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -164,7 +164,7 @@ void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap)
 {
-	// ƒoƒŠƒA‚ðÝ’è
+	// ãƒãƒªã‚¢ã‚’è¨­å®š
 	ID3D12Resource* backBuffer;
 	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
 	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
@@ -174,19 +174,19 @@ void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	commandList->ResourceBarrier(1, &resourceBarrier);
 
-	// ƒpƒCƒvƒ‰ƒCƒ“ƒXƒe[ƒg‚ðƒZƒbƒg
+	// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	commandList->SetPipelineState(pipelineState);
 
-	// ‚±‚ê‚©‚çŽg‚¤ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Æ‚µ‚ÄrtvHandle‚ðƒZƒbƒg
+	// ã“ã‚Œã‹ã‚‰ä½¿ã†ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã¨ã—ã¦rtvHandleã‚’ã‚»ãƒƒãƒˆ
 	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
 
-	// ƒNƒŠƒA
+	// ã‚¯ãƒªã‚¢
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-	// ƒŒƒ“ƒ_ƒŠƒ“ƒOÝ’èiChapter04‚Ü‚Åj
+	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°è¨­å®šï¼ˆChapter04ã¾ã§ï¼‰
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
 	commandList->SetGraphicsRootSignature(rootSignature);
@@ -194,14 +194,14 @@ void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 	commandList->IASetIndexBuffer(&indexBufferView);
 
-	// ƒŒƒ“ƒ_ƒŠƒ“ƒOÝ’èiChapter05‚Å’Ç‰Áj
+	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°è¨­å®šï¼ˆChapter05ã§è¿½åŠ ï¼‰
 	commandList->SetDescriptorHeaps(1, &basicDescHeap);
 	commandList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	// ƒŒƒ“ƒ_ƒŠƒ“ƒO
+	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-	// ƒoƒŠƒA‚É‚æ‚éŠ®—¹‘Ò‚¿
+	// ãƒãƒªã‚¢ã«ã‚ˆã‚‹å®Œäº†å¾…ã¡
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	commandList->ResourceBarrier(1, &resourceBarrier);

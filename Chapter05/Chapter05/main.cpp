@@ -21,10 +21,10 @@ int main() {
 	const unsigned int windowHeight = 720;
 
 	std::vector<Vertex> vertices = {
-		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}}, //ç∂â∫
-		{{-0.4f,  0.7f, 0.0f}, {0.0f, 0.0f}}, //ç∂è„
-		{{ 0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}}, //âEâ∫
-		{{ 0.4f,  0.7f, 0.0f}, {1.0f, 0.0f}}  //âEè„
+		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}}, //Â∑¶‰∏ã
+		{{-0.4f,  0.7f, 0.0f}, {0.0f, 0.0f}}, //Â∑¶‰∏ä
+		{{ 0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}}, //Âè≥‰∏ã
+		{{ 0.4f,  0.7f, 0.0f}, {1.0f, 0.0f}}  //Âè≥‰∏ä
 	};
 	std::vector<unsigned short> indices = { 0,1,2, 2,1,3 };
 
@@ -63,7 +63,7 @@ int main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// ÉeÉNÉXÉ`ÉÉê›íË
+	// „ÉÜ„ÇØ„Çπ„ÉÅ„É£Ë®≠ÂÆö
 	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
 	auto texDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 1);
 	createShaderResourceView(dev, texBuffer, texDescriptorHeap, 0);

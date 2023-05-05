@@ -14,12 +14,12 @@
 using namespace DirectX;
 
 
-// ’è”ƒoƒbƒtƒ@‚ğì¬
+// å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
 ID3D12Resource* createConstBuffer06(ID3D12Device* dev);
 
-// ’è”ƒoƒbƒtƒ@ƒrƒ…[‚ğì¬
-// idx : descriptorHeap‚Ì‰½”Ô–Ú‚©
+// å®šæ•°ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
+// idx : descriptorHeapã®ä½•ç•ªç›®ã‹
 void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID3D12DescriptorHeap* basicDescriptorHeap, UINT64 idx);
 
-// ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚ğì¬
+// ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ä½œæˆ
 ID3D12RootSignature* createRootSignature06(ID3D12Device* dev);

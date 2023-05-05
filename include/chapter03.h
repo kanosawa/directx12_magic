@@ -7,40 +7,40 @@
 #include <vector>
 
 
-// ƒEƒBƒ“ƒhƒEŠÖ˜A
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦é–¢é€£
 LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 WNDCLASSEX createWindowClass();
 HWND createWindowHandle(WNDCLASSEX windowClass, LONG windowWidth, LONG windowHeight);
 
-// Direct3DƒfƒoƒCƒX‚ğ‰Šú‰»iFX‚Èˆ—‚É•K—vj
+// Direct3Dãƒ‡ãƒã‚¤ã‚¹ã‚’åˆæœŸåŒ–ï¼ˆè‰²ã€…ãªå‡¦ç†ã«å¿…è¦ï¼‰
 ID3D12Device* createDevice();
 
-// DXGIƒtƒ@ƒNƒgƒŠ‚ğ‰Šú‰»iƒXƒƒbƒvƒ`ƒF[ƒ“‚Ìì¬‚É•K—vj
+// DXGIãƒ•ã‚¡ã‚¯ãƒˆãƒªã‚’åˆæœŸåŒ–ï¼ˆã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ã®ä½œæˆã«å¿…è¦ï¼‰
 IDXGIFactory6* createFactory();
 
-// ƒRƒ}ƒ“ƒhƒAƒƒP[ƒ^[‚ğì¬iƒRƒ}ƒ“ƒhƒIƒuƒWƒFƒNƒg–{‘Ìj
+// ã‚³ãƒãƒ³ãƒ‰ã‚¢ãƒ­ã‚±ãƒ¼ã‚¿ãƒ¼ã‚’ä½œæˆï¼ˆã‚³ãƒãƒ³ãƒ‰ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆæœ¬ä½“ï¼‰
 ID3D12CommandAllocator* createCommandAllocator(ID3D12Device* dev);
 
-// ƒRƒ}ƒ“ƒhƒŠƒXƒg‚ğì¬iƒRƒ}ƒ“ƒh‚ÌƒCƒ“ƒ^[ƒtƒF[ƒXBƒRƒ}ƒ“ƒh–{‘Ì‚ÍƒRƒ}ƒ“ƒhƒAƒƒP[ƒ^[‚É’~Ï‚³‚ê‚éj
+// ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆã‚’ä½œæˆï¼ˆã‚³ãƒãƒ³ãƒ‰ã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã€‚ã‚³ãƒãƒ³ãƒ‰æœ¬ä½“ã¯ã‚³ãƒãƒ³ãƒ‰ã‚¢ãƒ­ã‚±ãƒ¼ã‚¿ãƒ¼ã«è“„ç©ã•ã‚Œã‚‹ï¼‰
 ID3D12GraphicsCommandList* createCommandList(ID3D12Device* dev, ID3D12CommandAllocator* commandAllocator);
 
-// ƒRƒ}ƒ“ƒhƒLƒ…[‚ğì¬iƒRƒ}ƒ“ƒhÀs‚Ì‚½‚ß‚ÌƒCƒ“ƒ^[ƒtƒF[ƒXj
+// ã‚³ãƒãƒ³ãƒ‰ã‚­ãƒ¥ãƒ¼ã‚’ä½œæˆï¼ˆã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œã®ãŸã‚ã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ï¼‰
 ID3D12CommandQueue* createCommandQueue(ID3D12Device* dev);
 
-// ƒXƒƒbƒvƒ`ƒF[ƒ“‚ğì¬iƒ_ƒuƒ‹ƒoƒbƒtƒ@ƒŠƒ“ƒO‚Ì‚½‚ß‚Ìd‘g‚İj
+// ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ã‚’ä½œæˆï¼ˆãƒ€ãƒ–ãƒ«ãƒãƒƒãƒ•ã‚¡ãƒªãƒ³ã‚°ã®ãŸã‚ã®ä»•çµ„ã¿ï¼‰
 IDXGISwapChain4* createSwapChain(HWND hwnd, IDXGIFactory6* dxgiFactory, ID3D12CommandQueue* commandQueue, LONG windowWidth, LONG windowHeight);
 
-// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[—p‚ÌƒfƒBƒXƒNƒŠƒvƒ^ƒq[ƒv‚ğì¬
+// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ç”¨ã®ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ’ãƒ¼ãƒ—ã‚’ä½œæˆ
 ID3D12DescriptorHeap* createRenderTargetViewDescriptorHeap(ID3D12Device* dev);
 
-// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚ğì¬‚µAƒoƒbƒNƒoƒbƒtƒ@‚ğ•Ô‚·
+// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆã—ã€ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã‚’è¿”ã™
 std::vector<ID3D12Resource*> createRenderTargetViewAndGetBuckBuffers(ID3D12Device* dev, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap);
 
-// ƒtƒFƒ“ƒX‚ğì¬iƒRƒ}ƒ“ƒhÀsŠ®—¹Šm”F‚Ì‚½‚ß‚Ìd‘g‚İj
+// ãƒ•ã‚§ãƒ³ã‚¹ã‚’ä½œæˆï¼ˆã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œå®Œäº†ç¢ºèªã®ãŸã‚ã®ä»•çµ„ã¿ï¼‰
 ID3D12Fence* createFence(ID3D12Device* dev);
 
-// ƒoƒŠƒA‚ğì¬i”r‘¼§Œä‚Ì‚½‚ß‚Ìd‘g‚İj
+// ãƒãƒªã‚¢ã‚’ä½œæˆï¼ˆæ’ä»–åˆ¶å¾¡ã®ãŸã‚ã®ä»•çµ„ã¿ï¼‰
 D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);
 
-// ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—i‚ÌƒRƒ}ƒ“ƒhƒŠƒXƒg‚Ö‚Ì“o˜^j
+// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ï¼ˆã®ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆã¸ã®ç™»éŒ²ï¼‰
 void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, IDXGISwapChain4* swapChain);

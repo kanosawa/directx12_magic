@@ -11,45 +11,45 @@
 using namespace DirectX;
 
 
-// ’¸“_ƒoƒbƒtƒ@[‚ğì¬
+// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’ä½œæˆ
 ID3D12Resource* createVertexBuffer(ID3D12Device* dev, UINT64 datasize);
 
-// ’¸“_À•Wî•ñ‚ğƒ}ƒbƒv
+// é ‚ç‚¹åº§æ¨™æƒ…å ±ã‚’ãƒãƒƒãƒ—
 void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertices);
 
-// ’¸“_ƒoƒbƒtƒ@ƒrƒ…[‚ğì¬
+// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
 D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertices);
 
-// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@[‚ğì¬
+// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’ä½œæˆ
 ID3D12Resource* createIndexBuffer(ID3D12Device* dev, UINT64 datasize);
 
-// ƒCƒ“ƒfƒbƒNƒXî•ñ‚ğƒ}ƒbƒv
+// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±ã‚’ãƒãƒƒãƒ—
 void mapIndexBuffer(ID3D12Resource* indexBuffer, std::vector<unsigned short> indices);
 
-// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@ƒrƒ…[‚ğì¬
+// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
 D3D12_INDEX_BUFFER_VIEW createIndexBufferView(ID3D12Resource* indexBuffer, std::vector<unsigned short> indices);
 
-// ’¸“_ƒVƒF[ƒ_[ƒIƒuƒWƒFƒNƒg‚ğì¬
+// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
 ID3DBlob* createVertexShaderBlob();
 
-// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[ƒIƒuƒWƒFƒNƒg‚ğì¬
+// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
 ID3DBlob* createPixelShaderBlob();
 
-// ƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg‚ğì¬
+// ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ä½œæˆ
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout04();
 
-// ƒOƒ‰ƒtƒBƒbƒNƒXƒpƒCƒvƒ‰ƒCƒ“ƒXƒe[ƒg‚ğì¬
+// ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ä½œæˆ
 ID3D12PipelineState* createGraphicsPipelineState(ID3D12Device* dev, ID3DBlob* vertexShaderBlob, ID3DBlob* pixelShaderBlob, ID3D12RootSignature* rootSignature, std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout);
 
-// ƒrƒ…[ƒ|[ƒg‚ğì¬
+// ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã‚’ä½œæˆ
 D3D12_VIEWPORT createViewPort(int windowWidth, int windowHeight);
 
-// ƒVƒU[‹éŒ`‚ğì¬
+// ã‚·ã‚¶ãƒ¼çŸ©å½¢ã‚’ä½œæˆ
 D3D12_RECT createScissorRect(int windowWidth, int windowHeight);
 
-// ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚ğì¬i’¸“_î•ñˆÈŠO‚Ìƒf[ƒ^‚ğƒVƒF[ƒ_[‚É‘—‚é‚½‚ß‚Ìd‘g‚İj
-// Chapter04‚Å‚Í’¸“_î•ñ‚µ‚©g‚í‚È‚¢‚Ì‚ÅA‹ó‚Ìƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚ğì¬‚·‚é
+// ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ä½œæˆï¼ˆé ‚ç‚¹æƒ…å ±ä»¥å¤–ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«é€ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
+// Chapter04ã§ã¯é ‚ç‚¹æƒ…å ±ã—ã‹ä½¿ã‚ãªã„ã®ã§ã€ç©ºã®ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ä½œæˆã™ã‚‹
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
 
-// ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—i‚ÌƒRƒ}ƒ“ƒhƒŠƒXƒg‚Ö‚Ì“o˜^j
+// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ï¼ˆã®ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆã¸ã®ç™»éŒ²ï¼‰
 void render04(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect);

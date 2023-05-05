@@ -19,35 +19,35 @@ struct Vertex {
 };
 
 
-// ’¸“_ƒoƒbƒtƒ@‚ğƒ}ƒbƒviVertex”Åj
+// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ãƒãƒƒãƒ—ï¼ˆVertexç‰ˆï¼‰
 void mapVertexBuffer05(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices);
 
-// ’¸“_ƒoƒbƒtƒ@ƒrƒ…[‚ğì¬iVertex”Åj
+// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆï¼ˆVertexç‰ˆï¼‰
 D3D12_VERTEX_BUFFER_VIEW createVertexBufferView05(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices);
 
-// ƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg‚ğì¬iTEXCOORD’Ç‰Á”Åj
+// ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ä½œæˆï¼ˆTEXCOORDè¿½åŠ ç‰ˆï¼‰
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout05();
 
-// ƒeƒNƒXƒ`ƒƒƒq[ƒvƒvƒƒpƒeƒB‚ğì¬
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ’ãƒ¼ãƒ—ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’ä½œæˆ
 D3D12_HEAP_PROPERTIES createTexHeapProperties();
 
-// ƒeƒNƒXƒ`ƒƒƒŠƒ\[ƒXƒfƒBƒXƒNƒŠƒvƒ^‚ğì¬
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒªã‚½ãƒ¼ã‚¹ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ã‚’ä½œæˆ
 D3D12_RESOURCE_DESC createTexResourceDescriptor(TexMetadata metadata);
 
-// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚İAƒoƒbƒtƒ@‚ğì¬
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã¿ã€ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename);
 
-// ƒfƒBƒXƒNƒŠƒvƒ^ƒq[ƒv‚ğì¬
+// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ’ãƒ¼ãƒ—ã‚’ä½œæˆ
 ID3D12DescriptorHeap* createCbvSrvUavDescriptorHeap(ID3D12Device* dev, UINT64 numDescriptors);
 
-// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚ğì¬
+// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
 void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, UINT64 idx);
 
-// ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚ğì¬
+// ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ä½œæˆ
 ID3D12RootSignature* createRootSignature05(ID3D12Device* dev);
 
-// ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—i‚ÌƒRƒ}ƒ“ƒhƒŠƒXƒg‚Ö‚Ì“o˜^j
-// basicDescHeap‚ÍChapter05‚Ì“_‚Å‚ÍƒeƒNƒXƒ`ƒƒê—p‚¾‚ªAChapter06ˆÚs‚Å’è”‚ÆŒ“—p‚É‚È‚é
+// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ï¼ˆã®ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆã¸ã®ç™»éŒ²ï¼‰
+// basicDescHeapã¯Chapter05ã®æ™‚ç‚¹ã§ã¯ãƒ†ã‚¯ã‚¹ãƒãƒ£å°‚ç”¨ã ãŒã€Chapter06ç§»è¡Œã§å®šæ•°ã¨å…¼ç”¨ã«ãªã‚‹
 void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap);

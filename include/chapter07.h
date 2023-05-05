@@ -40,41 +40,41 @@ struct PMD_MODEL_07 {
 	std::vector<unsigned short> indices;
 };
 
-// PMDƒtƒ@ƒCƒ‹‚Ìƒwƒbƒ_‚ğ“Ç‚İ‚Ş
+// PMDãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ˜ãƒƒãƒ€ã‚’èª­ã¿è¾¼ã‚€
 void readPmdHeader(FILE* fp);
 
-// PMDƒtƒ@ƒCƒ‹‚Ì’¸“_î•ñ‚ğ“Ç‚İ‚Ş
+// PMDãƒ•ã‚¡ã‚¤ãƒ«ã®é ‚ç‚¹æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
 std::vector<PMD_VERTEX> readPmdVertices(FILE* fp);
 
-// PMDƒtƒ@ƒCƒ‹‚ÌƒCƒ“ƒfƒbƒNƒXî•ñ‚ğ“Ç‚İ‚Ş
+// PMDãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
 std::vector<unsigned short> readPmdIndices(FILE* fp);
 
-// PMDƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+// PMDãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 PMD_MODEL_07 readPmdFile07(std::string pmdFileName);
 
-// ’¸“_ƒoƒbƒtƒ@‚ğƒ}ƒbƒviPMDƒtƒ@ƒCƒ‹”Åj
+// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ãƒãƒƒãƒ—ï¼ˆPMDãƒ•ã‚¡ã‚¤ãƒ«ç‰ˆï¼‰
 void mapVertexBuffer07(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices);
 
-// ’¸“_ƒoƒbƒtƒ@ƒrƒ…[‚ğì¬iPMDƒtƒ@ƒCƒ‹”Åj
+// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆï¼ˆPMDãƒ•ã‚¡ã‚¤ãƒ«ç‰ˆï¼‰
 D3D12_VERTEX_BUFFER_VIEW createVertexBufferView07(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices);
 
-// ƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg‚ğì¬iPMDƒtƒ@ƒCƒ‹”Åj
+// ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ä½œæˆï¼ˆPMDãƒ•ã‚¡ã‚¤ãƒ«ç‰ˆï¼‰
 std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout07();
 
-// ’è”ƒoƒbƒtƒ@‚ğì¬iPMDƒtƒ@ƒCƒ‹”Åj
+// å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆï¼ˆPMDãƒ•ã‚¡ã‚¤ãƒ«ç‰ˆï¼‰
 ID3D12Resource* createConstBuffer07(ID3D12Device* dev);
 
-// ƒfƒvƒXƒoƒbƒtƒ@‚ğì¬
+// ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
 ID3D12Resource* createDepthBuffer(ID3D12Device* dev, int windowWidth, int windowHeight);
 
-// ƒfƒvƒXƒfƒBƒXƒNƒŠƒvƒ^ƒq[ƒv‚ğì¬
+// ãƒ‡ãƒ—ã‚¹ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ’ãƒ¼ãƒ—ã‚’ä½œæˆ
 ID3D12DescriptorHeap* createDepthDescriptorHeap(ID3D12Device* dev, ID3D12Resource* depthBuffer);
 
-// ƒfƒvƒXƒoƒbƒtƒ@ƒrƒ…[‚ğì¬
+// ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
 void createDepthBufferView(ID3D12Device* dev, ID3D12Resource* depthBuffer, ID3D12DescriptorHeap* dsvHeap);
 
-// ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—i‚ÌƒRƒ}ƒ“ƒhƒŠƒXƒg‚Ö‚Ì“o˜^j
-// ƒfƒvƒX•t‚«
+// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ï¼ˆã®ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆã¸ã®ç™»éŒ²ï¼‰
+// ãƒ‡ãƒ—ã‚¹ä»˜ã
 void render07(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, unsigned int indicesNum);
