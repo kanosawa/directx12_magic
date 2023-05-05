@@ -114,3 +114,8 @@ void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer,
 
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
+
+// レンダリング（マテリアル追加版）
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView,
+	IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap,
+	ID3D12DescriptorHeap* materialDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, std::vector<Material> materials);

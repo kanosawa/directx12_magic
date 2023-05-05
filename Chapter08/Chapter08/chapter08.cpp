@@ -468,3 +468,66 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	return rootSignature;
 }
+
+
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView,
+	IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap,
+	ID3D12DescriptorHeap* materialDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, std::vector<Material> materials)
+{
+	// バリアを設定
+	ID3D12Resource* backBuffer;
+	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
+	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
+	auto resourceBarrier = createResourceBarrier(backBuffer);
+
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+
+	// パイプラインステートをセット
+	commandList->SetPipelineState(pipelineState);
+
+	// これから使うレンダーターゲットビューとしてrtvHandleをセット
+	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	// デプスバッファの設定（Chapter07で追加）
+	auto depthHandle = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, &depthHandle);
+
+	// クリア
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	commandList->ClearDepthStencilView(depthHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);  // デプスバッファのクリア
+
+	// レンダリング設定（Chapter04まで）
+	commandList->RSSetViewports(1, &viewport);
+	commandList->RSSetScissorRects(1, &scissorRect);
+	commandList->SetGraphicsRootSignature(rootSignature);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetIndexBuffer(&indexBufferView);
+
+	// レンダリング設定（Chapter05で追加）
+	commandList->SetDescriptorHeaps(1, &basicDescHeap);
+	commandList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
+
+	//マテリアル
+	commandList->SetDescriptorHeaps(1, &materialDescHeap);
+
+	auto materialDescHeapHandle = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
+	unsigned int idxOffset = 0;
+
+	auto cbvsrvIncSize = dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * 5;
+	for (auto& m : materials) {
+		commandList->SetGraphicsRootDescriptorTable(1, materialDescHeapHandle);
+		commandList->DrawIndexedInstanced(m.indicesNum, 1, idxOffset, 0, 0);
+		materialDescHeapHandle.ptr += cbvsrvIncSize;
+		idxOffset += m.indicesNum;
+	}
+
+	// バリアによる完了待ち
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+}

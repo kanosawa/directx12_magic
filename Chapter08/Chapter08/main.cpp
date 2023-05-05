@@ -100,75 +100,23 @@ int main() {
 	float angle = 0.0f;
 	auto fence = createFence(dev);
 	auto dsvH = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
 	while (true) {
-		worldMat=XMMatrixRotationY(angle);
-		mapScene->world = worldMat;
-		mapScene->view= viewMat;
-		mapScene->proj = projMat;
-		angle += 0.01f;
 
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		//もうアプリケーションが終わるって時にmessageがWM_QUITになる
-		if (msg.message == WM_QUIT) {
-			break;
-		}
+		if (msg.message == WM_QUIT) break;
 
-		//DirectX処理
-		//バックバッファのインデックスを取得
-		auto bbIdx = swapChain->GetCurrentBackBufferIndex();
+		worldMat = XMMatrixRotationY(angle);
+		mapScene->world = worldMat;
+		mapScene->view = viewMat;
+		mapScene->proj = projMat;
+		angle += 0.01f;
 
-		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers[bbIdx],
-			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		commandList->ResourceBarrier(1, &barrier);
-
-		commandList->SetPipelineState(pipelineState);
-
-
-		//レンダーターゲットを指定
-		auto rtvH = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		rtvH.ptr += static_cast<ULONG_PTR>(bbIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
-		
-		commandList->OMSetRenderTargets(1, &rtvH, false, &dsvH);
-		commandList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-		//画面クリア
-
-		float clearColor[] = { 1.0f,1.0f,1.0f,1.0f };//白色
-		commandList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
-
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
-		
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-		commandList->IASetIndexBuffer(&indexBufferView);
-
-		commandList->SetGraphicsRootSignature(rootSignature);
-		
-		//WVP変換行列
-		commandList->SetDescriptorHeaps(1, &basicDescriptorHeap);
-		commandList->SetGraphicsRootDescriptorTable(0, basicDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-		//マテリアル
-		commandList->SetDescriptorHeaps(1, &materialDescriptorHeap);
-
-		auto materialH = materialDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-		unsigned int idxOffset = 0;
-
-		auto cbvsrvIncSize= dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)*5;
-		for (auto& m : materials) {
-			commandList->SetGraphicsRootDescriptorTable(1, materialH);
-			commandList->DrawIndexedInstanced(m.indicesNum, 1,idxOffset, 0, 0);
-			materialH.ptr += cbvsrvIncSize;
-			idxOffset += m.indicesNum;			
-		}
-
-		barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers[bbIdx],
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		commandList->ResourceBarrier(1, &barrier);
-
+		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState,
+			viewport, scissorRect, basicDescriptorHeap, materialDescriptorHeap, depthDescriptorHeap, materials);
 		commandList->Close();
 
 		ID3D12CommandList* cmdlists[] = { commandList };
