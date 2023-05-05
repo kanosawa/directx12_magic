@@ -38,3 +38,9 @@ std::vector<ID3D12Resource*> createRenderTargetViewAndGetBuckBuffers(ID3D12Devic
 
 // フェンスを作成（コマンド実行完了確認のための仕組み）
 ID3D12Fence* createFence(ID3D12Device* dev);
+
+// バリアを作成（排他制御のための仕組み）
+D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);
+
+// レンダリング処理（のコマンドリストへの登録）
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, IDXGISwapChain4* swapChain);

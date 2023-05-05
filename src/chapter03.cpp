@@ -158,3 +158,41 @@ ID3D12Fence* createFence(ID3D12Device* dev) {
 	auto result = dev->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	return fence;
 }
+
+
+D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
+	D3D12_RESOURCE_BARRIER resourceBarrier = {};
+	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	resourceBarrier.Transition.pResource = backBuffer;
+	resourceBarrier.Transition.Subresource = 0;
+	return resourceBarrier;
+}
+
+
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, IDXGISwapChain4* swapChain) {
+
+	// バリアを設定
+	ID3D12Resource* backBuffer;
+	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
+	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
+	auto resourceBarrier = createResourceBarrier(backBuffer);
+
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+
+	// これから使うレンダーターゲットビューとしてrtvHandleをセットする
+	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
+
+	// レンダリング
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	// バリアによる完了待ち
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+}

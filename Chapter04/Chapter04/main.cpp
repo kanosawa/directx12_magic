@@ -65,7 +65,7 @@ int main() {
 		}
 		if (msg.message == WM_QUIT) break;
 
-		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect);
+		render04(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect);
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };

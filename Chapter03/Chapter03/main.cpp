@@ -5,35 +5,6 @@
 #pragma comment(lib, "dxgi.lib")
 
 
-// レンダリング処理（のコマンドリストへの登録）
-void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, IDXGISwapChain4* swapChain) {
-
-	// バリアを設定
-	ID3D12Resource* backBuffer;
-	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
-	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
-	auto resourceBarrier = createResourceBarrier(backBuffer);
-
-	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	commandList->ResourceBarrier(1, &resourceBarrier);
-
-	// これから使うレンダーターゲットビューとしてrtvHandleをセットする
-	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
-
-	// レンダリング
-	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-	// バリアによる完了待ち
-	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	commandList->ResourceBarrier(1, &resourceBarrier);
-}
-
-
 int main() {
 	
 	const unsigned int windowWidth = 1280;

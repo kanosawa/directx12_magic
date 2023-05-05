@@ -1,3 +1,4 @@
+#include "chapter03.h"
 #include "chapter04.h"
 
 
@@ -187,16 +188,6 @@ D3D12_RECT createScissorRect(int windowWidth, int windowHeight) {
 }
 
 
-D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
-	D3D12_RESOURCE_BARRIER resourceBarrier = {};
-	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	resourceBarrier.Transition.pResource = backBuffer;
-	resourceBarrier.Transition.Subresource = 0;
-	return resourceBarrier;
-}
-
-
 // ルートシグネチャを作成（頂点情報以外のデータをシェーダーに送るための仕組み）
 // Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
@@ -227,7 +218,7 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 
 // レンダリング処理（のコマンドリストへの登録）
-void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect) {
+void render04(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect) {
 
 	// バリアを設定
 	ID3D12Resource* backBuffer;
