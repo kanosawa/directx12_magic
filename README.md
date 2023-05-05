@@ -6,7 +6,7 @@
 ## 参照リポジトリ
 
 * [directx12_samples](https://github.com/boxerprogrammer/directx12_samples) (MITライセンス)
-* [DirectXTex](https://github.com/microsoft/DirectXTex) (MITラインセンス)
+* [DirectXTex](https://github.com/microsoft/DirectXTex) (MITライセンス)
 
 
 ## 使い方
