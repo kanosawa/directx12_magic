@@ -1,5 +1,7 @@
 # directx12_magic
 
+![sample](https://user-images.githubusercontent.com/13146290/236548779-d4a54dff-80ab-4d38-b336-c0d263cd2ef9.gif)
+
 このリポジトリは[『DirectX12の魔道書（翔泳社）』](https://www.shoeisha.co.jp/book/detail/9784798161938)の非公式実装であり、公式実装の[directx12_samples](https://github.com/boxerprogrammer/directx12_samples)を基にしています。9章（リファクタリング）以前の章に対して、処理を関数に分割し、コード全体の見通しの良さを向上させています。詳しくは、[本リポジトリの長所](#本リポジトリの長所)の節を参照してください。
 
 
