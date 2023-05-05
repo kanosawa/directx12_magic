@@ -1,3 +1,4 @@
+#include "chapter04.h"
 #include "chapter05.h"
 
 
@@ -98,16 +99,6 @@ void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D
 	auto heapHandle = textureDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	heapHandle.ptr += dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * idx;
 	dev->CreateShaderResourceView(texBuffer, &shaderResourceViewDesc, heapHandle);
-}
-
-
-D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
-	D3D12_RESOURCE_BARRIER resourceBarrier = {};
-	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	resourceBarrier.Transition.pResource = backBuffer;
-	resourceBarrier.Transition.Subresource = 0;
-	return resourceBarrier;
 }
 
 

@@ -47,3 +47,5 @@ D3D12_VIEWPORT createViewPort(int windowWidth, int windowHeight);
 // シザー矩形を作成
 D3D12_RECT createScissorRect(int windowWidth, int windowHeight);
 
+// バリアを作成（排他制御のための仕組み）
+D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);

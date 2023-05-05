@@ -185,3 +185,13 @@ D3D12_RECT createScissorRect(int windowWidth, int windowHeight) {
 	scissorRect.bottom = scissorRect.top + windowHeight;
 	return scissorRect;
 }
+
+
+D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
+	D3D12_RESOURCE_BARRIER resourceBarrier = {};
+	resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	resourceBarrier.Transition.pResource = backBuffer;
+	resourceBarrier.Transition.Subresource = 0;
+	return resourceBarrier;
+}
