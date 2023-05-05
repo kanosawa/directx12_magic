@@ -134,7 +134,7 @@ void render07(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, unsigned int indicesNum)
 {
-	// ãƒãƒªã‚¢ã‚’è¨­å®š
+	// ƒoƒŠƒA‚ðÝ’è
 	ID3D12Resource* backBuffer;
 	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
 	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
@@ -144,23 +144,23 @@ void render07(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	commandList->ResourceBarrier(1, &resourceBarrier);
 
-	// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
+	// ƒpƒCƒvƒ‰ƒCƒ“ƒXƒe[ƒg‚ðƒZƒbƒg
 	commandList->SetPipelineState(pipelineState);
 
-	// ã“ã‚Œã‹ã‚‰ä½¿ã†ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã¨ã—ã¦rtvHandleã‚’ã‚»ãƒƒãƒˆ
+	// ‚±‚ê‚©‚çŽg‚¤ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Æ‚µ‚ÄrtvHandle‚ðƒZƒbƒg
 	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	// ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®šï¼ˆChapter07ã§è¿½åŠ ï¼‰
+	// ƒfƒvƒXƒoƒbƒtƒ@‚ÌÝ’èiChapter07‚Å’Ç‰Áj
 	auto depthHandle = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, &depthHandle);
 
-	// ã‚¯ãƒªã‚¢
+	// ƒNƒŠƒA
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	commandList->ClearDepthStencilView(depthHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);  // ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã®ã‚¯ãƒªã‚¢
+	commandList->ClearDepthStencilView(depthHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);  // ƒfƒvƒXƒoƒbƒtƒ@‚ÌƒNƒŠƒA
 
-	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°è¨­å®šï¼ˆChapter04ã¾ã§ï¼‰
+	// ƒŒƒ“ƒ_ƒŠƒ“ƒOÝ’èiChapter04‚Ü‚Åj
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
 	commandList->SetGraphicsRootSignature(rootSignature);
@@ -168,14 +168,14 @@ void render07(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 	commandList->IASetIndexBuffer(&indexBufferView);
 
-	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°è¨­å®šï¼ˆChapter05ã§è¿½åŠ ï¼‰
+	// ƒŒƒ“ƒ_ƒŠƒ“ƒOÝ’èiChapter05‚Å’Ç‰Áj
 	commandList->SetDescriptorHeaps(1, &basicDescHeap);
 	commandList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°
+	// ƒŒƒ“ƒ_ƒŠƒ“ƒO
 	commandList->DrawIndexedInstanced(indicesNum, 1, 0, 0, 0);
 
-	// ãƒãƒªã‚¢ã«ã‚ˆã‚‹å®Œäº†å¾…ã¡
+	// ƒoƒŠƒA‚É‚æ‚éŠ®—¹‘Ò‚¿
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	commandList->ResourceBarrier(1, &resourceBarrier);

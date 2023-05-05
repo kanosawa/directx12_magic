@@ -31,8 +31,8 @@ void main() {
 	auto rtvDescriptorHeap = createRenderTargetViewDescriptorHeap(dev);
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 
-	// PMDファイルの読み込み
-	auto pmdModel = readPmdFile07("model/初音ミク.pmd");
+	// PMD�t�@�C���̓ǂݍ���
+	auto pmdModel = readPmdFile07("model/�����~�N.pmd");
 	auto vertices = pmdModel.vertices;
 	auto indices = pmdModel.indices;
 
@@ -52,11 +52,11 @@ void main() {
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
 	// Chapter05, 06
-	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2); // テクスチャは無く、定数のみだが、ルートシグネチャをChapter06と共通化するためにnumDescriptor=2としておく
+	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2); // �e�N�X�`���͖����A�萔�݂̂����A���[�g�V�O�l�`����Chapter06�Ƌ��ʉ����邽�߂�numDescriptor=2�Ƃ��Ă���
 	auto constBuffer = createConstBuffer07(dev);
-	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1); // 上記同様、ShaderResourceViewがある想定で、idx=1としている
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1); // ��L���l�AShaderResourceView������z��ŁAidx=1�Ƃ��Ă���
 
-	// デプスバッファ
+	// �f�v�X�o�b�t�@
 	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
 	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
 	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);

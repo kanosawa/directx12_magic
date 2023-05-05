@@ -22,7 +22,7 @@ void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID
 
 ID3D12RootSignature* createRootSignature06(ID3D12Device* dev) {
 
-	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ãƒ¬ãƒ³ã‚¸ï¼ˆè¤‡æ•°ã®ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ã‚’ã¾ã¨ã‚ã¦ä½¿ç”¨ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
+	// ƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹ƒŒƒ“ƒWi•¡”‚ÌƒfƒBƒXƒNƒŠƒvƒ^‚ğ‚Ü‚Æ‚ß‚Äg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é‚½‚ß‚Ìd‘g‚İj
 	D3D12_DESCRIPTOR_RANGE descTableRange[2] = {};
 	descTableRange[0].NumDescriptors = 1;
 	descTableRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -34,14 +34,14 @@ ID3D12RootSignature* createRootSignature06(ID3D12Device* dev) {
 	descTableRange[1].BaseShaderRegister = 0;
 	descTableRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// ãƒ«ãƒ¼ãƒˆãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ï¼ˆãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ã®å®Ÿä½“ã€‚ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ã¯ãƒ†ã‚¯ã‚¹ãƒãƒ£ãªã©ã‚’CPU/GPUã§å…±é€šèªè­˜ã™ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
+	// ƒ‹[ƒgƒpƒ‰ƒ[ƒ^[iƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹‚ÌÀ‘ÌBƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹‚ÍƒeƒNƒXƒ`ƒƒ‚È‚Ç‚ğCPU/GPU‚Å‹¤’Ê”F¯‚·‚é‚½‚ß‚Ìd‘g‚İj
 	D3D12_ROOT_PARAMETER rootParam = {};
 	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParam.DescriptorTable.pDescriptorRanges = &descTableRange[0];
-	rootParam.DescriptorTable.NumDescriptorRanges = 2;  // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¨å®šæ•°ã§2
+	rootParam.DescriptorTable.NumDescriptorRanges = 2;  // ƒeƒNƒXƒ`ƒƒ‚Æ’è”‚Å2
 
-	// ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼ˆuvå€¤ã«ã‚ˆã£ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ã©ã†è‰²ã‚’å–ã‚Šå‡ºã™ã‹ã‚’æ±ºã‚ã‚‹ãŸã‚ã®è¨­å®šï¼‰
+	// ƒTƒ“ƒvƒ‰[iuv’l‚É‚æ‚Á‚ÄƒeƒNƒXƒ`ƒƒƒf[ƒ^‚©‚ç‚Ç‚¤F‚ğæ‚èo‚·‚©‚ğŒˆ‚ß‚é‚½‚ß‚Ìİ’èj
 	D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;

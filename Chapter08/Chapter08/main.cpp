@@ -16,8 +16,8 @@ using namespace std;
 
 int main() {
 
-	// PMD繝輔ぃ繧､繝ｫ隱ｭ縺ｿ霎ｼ縺ｿ
-	string strModelPath = "model/蟾｡髻ｳ繝ｫ繧ｫ.pmd";
+	// PMDファイル読み込み
+	string strModelPath = "model/巡音ルカ.pmd";
 	auto pmdModel = readPmdFile08(strModelPath);
 	auto vertices = pmdModel.vertices;
 	auto indices = pmdModel.indices;
@@ -56,7 +56,7 @@ int main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// 繝槭ユ繝ｪ繧｢繝ｫ
+	// マテリアル
 	auto materialBuffSize = (sizeof(MaterialForHlsl) + 0xff) & ~0xff;
 	auto materialBuffer = createMaterialBuffer(dev, materialBuffSize * materials.size());
 	mapMaterialBuffer(materialBuffer, materials);
@@ -64,12 +64,12 @@ int main() {
 	auto textureResources = createTextureResources(dev, materials, strModelPath);
 	createMaterialBufferView(dev, materialBuffer, materialDescriptorHeap, textureResources, materialNum);
 
-	// 蠎ｧ讓吝､画鋤繝槭ヨ繝ｪ繧ｯ繧ｹ
+	// 座標変換マトリクス
 	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 1);
 	auto constBuffer = createConstBuffer07(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
 
-	// 繝�繝励せ繝舌ャ繝輔ぃ
+	// デプスバッファ
 	auto depthBuffer = createDepthBuffer(dev, windowWidth, windowHeight);
 	auto depthDescriptorHeap = createDepthDescriptorHeap(dev, depthBuffer);
 	createDepthBufferView(dev, depthBuffer, depthDescriptorHeap);

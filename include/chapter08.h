@@ -15,7 +15,7 @@
 using namespace DirectX;
 
 
-// PMDãƒ•ã‚¡ã‚¤ãƒ«ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã®ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹é€ ä½“
+// PMDƒtƒ@ƒCƒ‹ƒtƒH[ƒ}ƒbƒg‚Ìƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
 #pragma pack(1)
 struct PMDMaterial {
 	XMFLOAT3 diffuse;
@@ -25,27 +25,27 @@ struct PMDMaterial {
 	XMFLOAT3 ambient;
 	unsigned char toonIdx;
 	unsigned char edgeFlg;
-	//2ãƒã‚¤ãƒˆã®ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°
+	//2ƒoƒCƒg‚ÌƒpƒfƒBƒ“ƒO
 	unsigned int indicesNum;
 	char texFilePath[20];
 };
 #pragma pack()
 
 
-// HLSLç”¨ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹é€ ä½“
+// HLSL—pƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
 struct MaterialForHlsl {
-	// ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚º
+	// ƒfƒBƒtƒ…[ƒY
 	XMFLOAT3 diffuse;
 	float alpha;
-	// ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼
+	// ƒXƒyƒLƒ…ƒ‰[
 	XMFLOAT3 specular;
 	float specularity;
-	// ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆ
+	// ƒAƒ“ƒrƒGƒ“ƒg
 	XMFLOAT3 ambient;
 };
 
 
-// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ç”¨ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹é€ ä½“
+// ƒŒƒ“ƒ_ƒŠƒ“ƒO—pƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
 struct Material {
 	MaterialForHlsl materialForHlsl;
 	unsigned char toonIdx;
@@ -55,7 +55,7 @@ struct Material {
 };
 
 
-// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒªã‚½ãƒ¼ã‚¹ï¼ˆãƒãƒƒãƒ•ã‚¡ï¼‰
+// ƒeƒNƒXƒ`ƒƒƒŠƒ\[ƒXiƒoƒbƒtƒ@j
 struct TextureResources {
 	std::vector<ID3D12Resource*> normalTex;
 	std::vector<ID3D12Resource*> sph;
@@ -64,7 +64,7 @@ struct TextureResources {
 };
 
 
-// PMDãƒ¢ãƒ‡ãƒ«æ§‹é€ ä½“
+// PMDƒ‚ƒfƒ‹\‘¢‘Ì
 struct PMD_MODEL_08 {
 	std::vector<PMD_VERTEX> vertices;
 	std::vector<unsigned short> indices;
@@ -72,50 +72,50 @@ struct PMD_MODEL_08 {
 };
 
 
-// ãƒ•ã‚¡ã‚¤ãƒ«åé–¢é€£é–¢æ•°
+// ƒtƒ@ƒCƒ‹–¼ŠÖ˜AŠÖ”
 std::string GetTexturePathFromModelAndTexPath(const std::string& modelPath, const char* texPath);
 std::string GetExtension(const std::string& path);
 std::wstring GetExtension(const std::wstring& path);
 std::pair<std::string, std::string> SplitFileName(const std::string& path, const char splitter = '*');
 std::wstring GetWideStringFromString(const std::string& str);
 
-// PMDãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
+// PMDƒtƒ@ƒCƒ‹‚Ìƒ}ƒeƒŠƒAƒ‹î•ñ‚ğ“Ç‚İ‚Ş
 std::vector<PMDMaterial> readPmdMaterials(FILE* fp);
 
-// PMDãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€ï¼ˆãƒãƒ†ãƒªã‚¢ãƒ«è¿½åŠ ç‰ˆï¼‰
+// PMDƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Şiƒ}ƒeƒŠƒAƒ‹’Ç‰Á”Åj
 PMD_MODEL_08 readPmdFile08(std::string pmdFileName);
 
-// PMDMaterialã‹ã‚‰Materialã¸ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±ã‚’ã‚³ãƒ”ãƒ¼
+// PMDMaterial‚©‚çMaterial‚Öƒ}ƒeƒŠƒAƒ‹î•ñ‚ğƒRƒs[
 std::vector<Material> transformMaterials(std::vector<PMDMaterial> pmdMaterials);
 
-// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã¿ã€ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆï¼ˆè¤‡æ•°æ‹¡å¼µå­å¯¾å¿œç‰ˆï¼‰
+// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚İAƒoƒbƒtƒ@‚ğì¬i•¡”Šg’£q‘Î‰”Åj
 ID3D12Resource* loadTextureAndCreateBuffer08(ID3D12Device* dev, std::string textureFilename);
 
-// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
+// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
 ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::string& texPath);
 
-// ãƒˆã‚¥ãƒ¼ãƒ³ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
+// ƒgƒD[ƒ“ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
 ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, unsigned char toonIdx);
 
-// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒªã‚½ãƒ¼ã‚¹ï¼ˆãƒãƒƒãƒ•ã‚¡ï¼‰ã‚’ä½œæˆ
+// ƒeƒNƒXƒ`ƒƒƒŠƒ\[ƒXiƒoƒbƒtƒ@j‚ğì¬
 TextureResources createTextureResources(ID3D12Device* dev, std::vector<Material> materials, std::string modelPath);
 
-// ãƒˆã‚¥ãƒ¼ãƒ³ä»¥å¤–ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
+// ƒgƒD[ƒ“ˆÈŠO‚ÌƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
 void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, TextureResources& textureResources, int material_idx, std::string texFileName, std::string modelPath);
 
-// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
+// ƒ}ƒeƒŠƒAƒ‹ƒoƒbƒtƒ@‚ğì¬
 ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize);
 
-// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒãƒƒãƒ•ã‚¡ã‚’ãƒãƒƒãƒ—
+// ƒ}ƒeƒŠƒAƒ‹ƒoƒbƒtƒ@‚ğƒ}ƒbƒv
 void mapMaterialBuffer(ID3D12Resource* materialBuffer, std::vector<Material> materials);
 
-// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
+// ƒ}ƒeƒŠƒAƒ‹ƒoƒbƒtƒ@ƒrƒ…[‚ğì¬
 void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer, ID3D12DescriptorHeap* descriptorHeap, TextureResources textureResources, UINT64 materialNum);
 
-// ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ä½œæˆï¼ˆãƒãƒ†ãƒªã‚¢ãƒ«è¿½åŠ ç‰ˆï¼‰
+// ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚ğì¬iƒ}ƒeƒŠƒAƒ‹’Ç‰Á”Åj
 ID3D12RootSignature* createRootSignature08(ID3D12Device* dev);
 
-// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ï¼ˆãƒãƒ†ãƒªã‚¢ãƒ«è¿½åŠ ç‰ˆï¼‰
+// ƒŒƒ“ƒ_ƒŠƒ“ƒOiƒ}ƒeƒŠƒAƒ‹’Ç‰Á”Åj
 void render08(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView,
 	IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap,
 	ID3D12DescriptorHeap* materialDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, std::vector<Material> materials);

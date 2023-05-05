@@ -7,9 +7,9 @@ using namespace DirectX;
 
 
 std::string GetTexturePathFromModelAndTexPath(const std::string& modelPath, const char* texPath) {
-	//ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ•ã‚©ãƒ«ãƒ€åŒºåˆ‡ã‚Šã¯\ã¨/ã®äºŒç¨®é¡ãŒä½¿ç”¨ã•ã‚Œã‚‹å¯èƒ½æ€§ãŒã‚ã‚Š
-	//ã¨ã‚‚ã‹ãæœ«å°¾ã®\ã‹/ã‚’å¾—ã‚‰ã‚Œã‚Œã°ã„ã„ã®ã§ã€åŒæ–¹ã®rfindã‚’ã¨ã‚Šæ¯”è¼ƒã™ã‚‹
-	//intå‹ã«ä»£å…¥ã—ã¦ã„ã‚‹ã®ã¯è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã¯rfindãŒepos(-1â†’0xffffffff)ã‚’è¿”ã™ãŸã‚
+	//ƒtƒ@ƒCƒ‹‚ÌƒtƒHƒ‹ƒ_‹æØ‚è‚Í\‚Æ/‚Ì“ñí—Ş‚ªg—p‚³‚ê‚é‰Â”\«‚ª‚ ‚è
+	//‚Æ‚à‚©‚­––”ö‚Ì\‚©/‚ğ“¾‚ç‚ê‚ê‚Î‚¢‚¢‚Ì‚ÅA‘o•û‚Ìrfind‚ğ‚Æ‚è”äŠr‚·‚é
+	//intŒ^‚É‘ã“ü‚µ‚Ä‚¢‚é‚Ì‚ÍŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡‚Írfind‚ªepos(-1¨0xffffffff)‚ğ•Ô‚·‚½‚ß
 	auto pathIndex1 = modelPath.rfind('/');
 	auto pathIndex2 = modelPath.rfind('\\');
 	auto pathIndex = max(pathIndex1, pathIndex2);
@@ -40,20 +40,20 @@ std::pair<std::string, std::string> SplitFileName(const std::string& path, const
 
 
 std::wstring GetWideStringFromString(const std::string& str) {
-	//å‘¼ã³å‡ºã—1å›ç›®(æ–‡å­—åˆ—æ•°ã‚’å¾—ã‚‹)
+	//ŒÄ‚Ño‚µ1‰ñ–Ú(•¶š—ñ”‚ğ“¾‚é)
 	auto num1 = MultiByteToWideChar(CP_ACP,
 		MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
 		str.c_str(), -1, nullptr, 0);
 
-	std::wstring wstr;//stringã®wchar_tç‰ˆ
-	wstr.resize(num1);//å¾—ã‚‰ã‚ŒãŸæ–‡å­—åˆ—æ•°ã§ãƒªã‚µã‚¤ã‚º
+	std::wstring wstr;//string‚Ìwchar_t”Å
+	wstr.resize(num1);//“¾‚ç‚ê‚½•¶š—ñ”‚ÅƒŠƒTƒCƒY
 
-	//å‘¼ã³å‡ºã—2å›ç›®(ç¢ºä¿æ¸ˆã¿ã®wstrã«å¤‰æ›æ–‡å­—åˆ—ã‚’ã‚³ãƒ”ãƒ¼)
+	//ŒÄ‚Ño‚µ2‰ñ–Ú(Šm•ÛÏ‚İ‚Ìwstr‚É•ÏŠ·•¶š—ñ‚ğƒRƒs[)
 	auto num2 = MultiByteToWideChar(CP_ACP,
 		MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
 		str.c_str(), -1, &wstr[0], num1);
 
-	assert(num1 == num2);//ä¸€å¿œãƒã‚§ãƒƒã‚¯
+	assert(num1 == num2);//ˆê‰ƒ`ƒFƒbƒN
 	return wstr;
 }
 
@@ -148,7 +148,7 @@ ID3D12Resource* loadTextureAndCreateBuffer08(ID3D12Device* dev, std::string text
 
 ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::string& texPath) {
 
-	//ãƒ†ãƒ¼ãƒ–ãƒ«ã«å†…ã«ã‚ã£ãŸã‚‰ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ã®ã§ã¯ãªããƒãƒƒãƒ—å†…ã®ãƒªã‚½ãƒ¼ã‚¹ã‚’è¿”ã™
+	//ƒe[ƒuƒ‹‚É“à‚É‚ ‚Á‚½‚çƒ[ƒh‚·‚é‚Ì‚Å‚Í‚È‚­ƒ}ƒbƒv“à‚ÌƒŠƒ\[ƒX‚ğ•Ô‚·
 	auto it = resourceTable.find(texPath);
 	if (it != resourceTable.end()) {
 		return resourceTable[texPath];
@@ -172,7 +172,7 @@ ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12R
 void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, TextureResources& textureResources, int material_idx, std::string texFileName, std::string modelPath) {
 
 	std::vector<std::string> texFilePathes;
-	if (std::count(texFileName.begin(), texFileName.end(), '*') > 0) { //ã‚¹ãƒ—ãƒªãƒƒã‚¿ãŒã‚ã‚‹
+	if (std::count(texFileName.begin(), texFileName.end(), '*') > 0) { //ƒXƒvƒŠƒbƒ^‚ª‚ ‚é
 		auto namepair = SplitFileName(texFileName);
 		texFilePathes.push_back(std::string("model/") + namepair.first);
 		texFilePathes.push_back(std::string("model/") + namepair.second);
@@ -217,7 +217,7 @@ TextureResources createTextureResources(ID3D12Device* dev, std::vector<Material>
 
 
 ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize) {
-	// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®å‡¦ç†ã‚’æµç”¨
+	// ’¸“_ƒoƒbƒtƒ@‚Ìˆ—‚ğ—¬—p
 	return createVertexBuffer(dev, datasize);
 }
 
@@ -258,7 +258,7 @@ ID3D12Resource* CreateMonoTexture(ID3D12Device* dev, int value) {
 	ID3D12Resource* blackBuff = nullptr;
 	auto result = dev->CreateCommittedResource(
 		&texHeapProp,
-		D3D12_HEAP_FLAG_NONE,//ç‰¹ã«æŒ‡å®šãªã—
+		D3D12_HEAP_FLAG_NONE,//“Á‚Éw’è‚È‚µ
 		&resDesc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		nullptr,
@@ -283,7 +283,7 @@ ID3D12Resource* CreateGrayGradationTexture(ID3D12Device* dev) {
 	ID3D12Resource* gradBuff = nullptr;
 	auto result = dev->CreateCommittedResource(
 		&texHeapProp,
-		D3D12_HEAP_FLAG_NONE,//ç‰¹ã«æŒ‡å®šãªã—
+		D3D12_HEAP_FLAG_NONE,//“Á‚Éw’è‚È‚µ
 		&resDesc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		nullptr,
@@ -293,13 +293,13 @@ ID3D12Resource* CreateGrayGradationTexture(ID3D12Device* dev) {
 		return nullptr;
 	}
 
-	//ä¸ŠãŒç™½ãã¦ä¸‹ãŒé»’ã„ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‚’ä½œæˆ
+	//ã‚ª”’‚­‚Ä‰º‚ª•‚¢ƒeƒNƒXƒ`ƒƒƒf[ƒ^‚ğì¬
 	std::vector<unsigned int> data(4 * 256);
 	auto it = data.begin();
 	unsigned int c = 0xff;
 	for (; it != data.end(); it += 4) {
-		auto col = (0xff << 24) | RGB(c, c, c);//RGBAãŒé€†ä¸¦ã³ã—ã¦ã„ã‚‹ãŸã‚RGBãƒã‚¯ãƒ­ã¨0xff<<24ã‚’ç”¨ã„ã¦è¡¨ã™ã€‚
-		//auto col = (0xff << 24) | (c<<16)|(c<<8)|c;//ã“ã‚Œã§ã‚‚OK
+		auto col = (0xff << 24) | RGB(c, c, c);//RGBA‚ª‹t•À‚Ñ‚µ‚Ä‚¢‚é‚½‚ßRGBƒ}ƒNƒ‚Æ0xff<<24‚ğ—p‚¢‚Ä•\‚·B
+		//auto col = (0xff << 24) | (c<<16)|(c<<8)|c;//‚±‚ê‚Å‚àOK
 		std::fill(it, it + 4, col);
 		--c;
 	}
@@ -317,14 +317,14 @@ void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer,
 
 	auto materialBuffSize = (sizeof(MaterialForHlsl) + 0xff) & ~0xff;
 
-	// ãƒãƒ†ãƒªã‚¢ãƒ«ç”¨ã®ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ãƒ“ãƒ¥ãƒ¼ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿
-	// è¤‡æ•°ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã«å¯¾ã—ã¦ã€BufferLocationã‚’æ›¸ãæ›ãˆãªãŒã‚‰å†åˆ©ç”¨ã™ã‚‹
+	// ƒ}ƒeƒŠƒAƒ‹—p‚ÌƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@ƒrƒ…[ƒfƒBƒXƒNƒŠƒvƒ^
+	// •¡”‚Ìƒ}ƒeƒŠƒAƒ‹‚É‘Î‚µ‚ÄABufferLocation‚ğ‘‚«Š·‚¦‚È‚ª‚çÄ—˜—p‚·‚é
 	D3D12_CONSTANT_BUFFER_VIEW_DESC materialConstBufferViewDesc = {};
 	materialConstBufferViewDesc.BufferLocation = materialBuffer->GetGPUVirtualAddress();
 	materialConstBufferViewDesc.SizeInBytes = static_cast<UINT>(materialBuffSize);
 
-	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿
-	// è¤‡æ•°ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã«å¯¾ã—ã¦ã€Formatã‚’æ›¸ãæ›ãˆãªãŒã‚‰å†åˆ©ç”¨ã™ã‚‹
+	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[ƒfƒBƒXƒNƒŠƒvƒ^
+	// •¡”‚ÌƒeƒNƒXƒ`ƒƒƒtƒH[ƒ}ƒbƒg‚É‘Î‚µ‚ÄAFormat‚ğ‘‚«Š·‚¦‚È‚ª‚çÄ—˜—p‚·‚é
 	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
 	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -334,12 +334,12 @@ void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer,
 	auto incSize = dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	for (size_t i = 0; i < materialNum; ++i) {
 
-		// ãƒãƒ†ãƒªã‚¢ãƒ«å®šæ•°
+		// ƒ}ƒeƒŠƒAƒ‹’è”
 		dev->CreateConstantBufferView(&materialConstBufferViewDesc, materialDescriptorHeapHandle);
 		materialDescriptorHeapHandle.ptr += incSize;
 		materialConstBufferViewDesc.BufferLocation += materialBuffSize;
 
-		// ä¸€èˆ¬ãƒ†ã‚¯ã‚¹ãƒãƒ£
+		// ˆê”ÊƒeƒNƒXƒ`ƒƒ
 		if (textureResources.normalTex[i] == nullptr) {
 			shaderResourceViewDesc.Format = whiteTex->GetDesc().Format;
 			dev->CreateShaderResourceView(whiteTex, &shaderResourceViewDesc, materialDescriptorHeapHandle);
@@ -372,7 +372,7 @@ void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer,
 		}
 		materialDescriptorHeapHandle.ptr += incSize;
 
-		// ãƒˆã‚¥ãƒ¼ãƒ³
+		// ƒgƒD[ƒ“
 		if (textureResources.toon[i] == nullptr) {
 			shaderResourceViewDesc.Format = gradTex->GetDesc().Format;
 			dev->CreateShaderResourceView(gradTex, &shaderResourceViewDesc, materialDescriptorHeapHandle);
@@ -388,53 +388,53 @@ void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer,
 
 ID3D12RootSignature* createRootSignature08(ID3D12Device* dev) {
 
-	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ãƒ¬ãƒ³ã‚¸ï¼ˆè¤‡æ•°ã®ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ã‚’ã¾ã¨ã‚ã¦ä½¿ç”¨ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
+	// ƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹ƒŒƒ“ƒWi•¡”‚ÌƒfƒBƒXƒNƒŠƒvƒ^‚ğ‚Ü‚Æ‚ß‚Äg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é‚½‚ß‚Ìd‘g‚İj
 	D3D12_DESCRIPTOR_RANGE descTableRange[3] = {};
 
-	// ãƒãƒˆãƒªã‚¯ã‚¹å®šæ•°
+	// ƒ}ƒgƒŠƒNƒX’è”
 	descTableRange[0].NumDescriptors = 1;
 	descTableRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	descTableRange[0].BaseShaderRegister = 0;
 	descTableRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// ãƒãƒ†ãƒªã‚¢ãƒ«å®šæ•°
+	// ƒ}ƒeƒŠƒAƒ‹’è”
 	descTableRange[1].NumDescriptors = 1;
 	descTableRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	descTableRange[1].BaseShaderRegister = 1;
 	descTableRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// ãƒ†ã‚¯ã‚¹ãƒãƒ£
-	descTableRange[2].NumDescriptors = 4; // åŸºæœ¬, sph, spa, ãƒˆã‚¥ãƒ¼ãƒ³
+	// ƒeƒNƒXƒ`ƒƒ
+	descTableRange[2].NumDescriptors = 4; // Šî–{, sph, spa, ƒgƒD[ƒ“
 	descTableRange[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descTableRange[2].BaseShaderRegister = 0;
 	descTableRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// ãƒ«ãƒ¼ãƒˆãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ï¼ˆãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ã®å®Ÿä½“ã€‚ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ†ãƒ¼ãƒ–ãƒ«ã¯ãƒ†ã‚¯ã‚¹ãƒãƒ£ãªã©ã‚’CPU/GPUã§å…±é€šèªè­˜ã™ã‚‹ãŸã‚ã®ä»•çµ„ã¿ï¼‰
+	// ƒ‹[ƒgƒpƒ‰ƒ[ƒ^[iƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹‚ÌÀ‘ÌBƒfƒBƒXƒNƒŠƒvƒ^ƒe[ƒuƒ‹‚ÍƒeƒNƒXƒ`ƒƒ‚È‚Ç‚ğCPU/GPU‚Å‹¤’Ê”F¯‚·‚é‚½‚ß‚Ìd‘g‚İj
 	D3D12_ROOT_PARAMETER rootParam[2] = {};
 	rootParam[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam[0].DescriptorTable.pDescriptorRanges = &descTableRange[0];
 	rootParam[0].DescriptorTable.NumDescriptorRanges = 1;
 	rootParam[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	// ãƒãƒ†ãƒªã‚¢ãƒ«å®šæ•°ã¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¯ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‹ã‚‰è¦‹ãˆã‚Œã°ã‚ˆã„
+	// ƒ}ƒeƒŠƒAƒ‹’è”‚ÆƒeƒNƒXƒ`ƒƒ‚ÍƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚©‚çŒ©‚¦‚ê‚Î‚æ‚¢
 	rootParam[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParam[1].DescriptorTable.pDescriptorRanges = &descTableRange[1];
 	rootParam[1].DescriptorTable.NumDescriptorRanges = 2;
 	rootParam[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	// ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼ˆuvå€¤ã«ã‚ˆã£ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ã©ã†è‰²ã‚’å–ã‚Šå‡ºã™ã‹ã‚’æ±ºã‚ã‚‹ãŸã‚ã®è¨­å®šï¼‰
+	// ƒTƒ“ƒvƒ‰[iuv’l‚É‚æ‚Á‚ÄƒeƒNƒXƒ`ƒƒƒf[ƒ^‚©‚ç‚Ç‚¤F‚ğæ‚èo‚·‚©‚ğŒˆ‚ß‚é‚½‚ß‚Ìİ’èj
 	D3D12_STATIC_SAMPLER_DESC samplerDesc[2] = {};
-	samplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//æ¨ªç¹°ã‚Šè¿”ã—
-	samplerDesc[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//ç¸¦ç¹°ã‚Šè¿”ã—
-	samplerDesc[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//å¥¥è¡Œç¹°ã‚Šè¿”ã—
-	samplerDesc[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;//ãƒœãƒ¼ãƒ€ãƒ¼ã®æ™‚ã¯é»’
-	samplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;//è£œé–“ã—ãªã„(ãƒ‹ã‚¢ãƒ¬ã‚¹ãƒˆãƒã‚¤ãƒãƒ¼)
-	samplerDesc[0].MaxLOD = D3D12_FLOAT32_MAX;//ãƒŸãƒƒãƒ—ãƒãƒƒãƒ—æœ€å¤§å€¤
-	samplerDesc[0].MinLOD = 0.0f;//ãƒŸãƒƒãƒ—ãƒãƒƒãƒ—æœ€å°å€¤
-	samplerDesc[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;//ã‚ªãƒ¼ãƒãƒ¼ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã®éš›ãƒªã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã—ãªã„ï¼Ÿ
-	samplerDesc[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ã‹ã‚‰ã®ã¿å¯è¦–
+	samplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//‰¡ŒJ‚è•Ô‚µ
+	samplerDesc[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//cŒJ‚è•Ô‚µ
+	samplerDesc[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//‰œsŒJ‚è•Ô‚µ
+	samplerDesc[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;//ƒ{[ƒ_[‚Ì‚Í•
+	samplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;//•âŠÔ‚µ‚È‚¢(ƒjƒAƒŒƒXƒgƒlƒCƒo[)
+	samplerDesc[0].MaxLOD = D3D12_FLOAT32_MAX;//ƒ~ƒbƒvƒ}ƒbƒvÅ‘å’l
+	samplerDesc[0].MinLOD = 0.0f;//ƒ~ƒbƒvƒ}ƒbƒvÅ¬’l
+	samplerDesc[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;//ƒI[ƒo[ƒTƒ“ƒvƒŠƒ“ƒO‚ÌÛƒŠƒTƒ“ƒvƒŠƒ“ƒO‚µ‚È‚¢H
+	samplerDesc[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//ƒsƒNƒZƒ‹ƒVƒF[ƒ_‚©‚ç‚Ì‚İ‰Â‹
 	samplerDesc[0].ShaderRegister = 0;
-	samplerDesc[1] = samplerDesc[0];//å¤‰æ›´ç‚¹ä»¥å¤–ã‚’ã‚³ãƒ”ãƒ¼
+	samplerDesc[1] = samplerDesc[0];//•ÏX“_ˆÈŠO‚ğƒRƒs[
 	samplerDesc[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;//
 	samplerDesc[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
@@ -473,7 +473,7 @@ void render08(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap,
 	ID3D12DescriptorHeap* materialDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, std::vector<Material> materials)
 {
-	// ãƒãƒªã‚¢ã‚’è¨­å®š
+	// ƒoƒŠƒA‚ğİ’è
 	ID3D12Resource* backBuffer;
 	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
 	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
@@ -483,23 +483,23 @@ void render08(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	commandList->ResourceBarrier(1, &resourceBarrier);
 
-	// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
+	// ƒpƒCƒvƒ‰ƒCƒ“ƒXƒe[ƒg‚ğƒZƒbƒg
 	commandList->SetPipelineState(pipelineState);
 
-	// ã“ã‚Œã‹ã‚‰ä½¿ã†ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã¨ã—ã¦rtvHandleã‚’ã‚»ãƒƒãƒˆ
+	// ‚±‚ê‚©‚çg‚¤ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Æ‚µ‚ÄrtvHandle‚ğƒZƒbƒg
 	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	// ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®šï¼ˆChapter07ã§è¿½åŠ ï¼‰
+	// ƒfƒvƒXƒoƒbƒtƒ@‚Ìİ’èiChapter07‚Å’Ç‰Áj
 	auto depthHandle = depthDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, &depthHandle);
 
-	// ã‚¯ãƒªã‚¢
+	// ƒNƒŠƒA
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	commandList->ClearDepthStencilView(depthHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);  // ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã®ã‚¯ãƒªã‚¢
+	commandList->ClearDepthStencilView(depthHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);  // ƒfƒvƒXƒoƒbƒtƒ@‚ÌƒNƒŠƒA
 
-	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°è¨­å®šï¼ˆChapter04ã¾ã§ï¼‰
+	// ƒŒƒ“ƒ_ƒŠƒ“ƒOİ’èiChapter04‚Ü‚Åj
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
 	commandList->SetGraphicsRootSignature(rootSignature);
@@ -507,11 +507,11 @@ void render08(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 	commandList->IASetIndexBuffer(&indexBufferView);
 
-	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°è¨­å®šï¼ˆChapter05ã§è¿½åŠ ï¼‰
+	// ƒŒƒ“ƒ_ƒŠƒ“ƒOİ’èiChapter05‚Å’Ç‰Áj
 	commandList->SetDescriptorHeaps(1, &basicDescHeap);
 	commandList->SetGraphicsRootDescriptorTable(0, basicDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	//ãƒãƒ†ãƒªã‚¢ãƒ«
+	//ƒ}ƒeƒŠƒAƒ‹
 	commandList->SetDescriptorHeaps(1, &materialDescHeap);
 
 	auto materialDescHeapHandle = materialDescHeap->GetGPUDescriptorHandleForHeapStart();
@@ -525,7 +525,7 @@ void render08(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12
 		idxOffset += m.indicesNum;
 	}
 
-	// ãƒãƒªã‚¢ã«ã‚ˆã‚‹å®Œäº†å¾…ã¡
+	// ƒoƒŠƒA‚É‚æ‚éŠ®—¹‘Ò‚¿
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	commandList->ResourceBarrier(1, &resourceBarrier);

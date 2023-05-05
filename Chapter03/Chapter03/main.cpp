@@ -39,7 +39,7 @@ int main() {
 		ID3D12CommandList* constCommandList[] = { commandList };
 		commandQueue->ExecuteCommandLists(1, constCommandList);
 
-		// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å®Œäº†å¾…ã¡
+		// ƒŒƒ“ƒ_ƒŠƒ“ƒOŠ®—¹‘Ò‚¿
 		commandQueue->Signal(fence, ++fenceVal);
 		auto event = CreateEvent(nullptr, false, false, nullptr);
 		fence->SetEventOnCompletion(fenceVal, event);

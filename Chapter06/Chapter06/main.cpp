@@ -21,10 +21,10 @@ void main() {
 	const unsigned int windowHeight = 720;
 
 	std::vector<Vertex> vertices = {
-		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}}, //å·¦ä¸‹
-		{{-0.4f,  0.7f, 0.0f}, {0.0f, 0.0f}}, //å·¦ä¸Š
-		{{ 0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}}, //å³ä¸‹
-		{{ 0.4f,  0.7f, 0.0f}, {1.0f, 0.0f}}  //å³ä¸Š
+		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}}, //¶‰º
+		{{-0.4f,  0.7f, 0.0f}, {0.0f, 0.0f}}, //¶ã
+		{{ 0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}}, //‰E‰º
+		{{ 0.4f,  0.7f, 0.0f}, {1.0f, 0.0f}}  //‰Eã
 	};
 
 	std::vector<unsigned short> indices = { 0,1,2, 2,1,3 };
@@ -56,16 +56,16 @@ void main() {
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
-	// Chapter05ï¼ˆTexDescriptorHeapã‚’BasicDescriptorHeapã«å¤‰æ›´ï¼‰
+	// Chapter05iTexDescriptorHeap‚ğBasicDescriptorHeap‚É•ÏXj
 	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
 	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2);
 	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, 0);
 
-	// å®šæ•°ãƒãƒƒãƒ•ã‚¡
+	// ’è”ƒoƒbƒtƒ@
 	auto constBuffer = createConstBuffer06(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1);
 	
-	// ãƒãƒˆãƒªã‚¯ã‚¹ä½œæˆ
+	// ƒ}ƒgƒŠƒNƒXì¬
 	XMFLOAT3 eye(0, 0, -5);
 	XMFLOAT3 target(0, 0, 0);
 	XMFLOAT3 up(0, 1, 0);

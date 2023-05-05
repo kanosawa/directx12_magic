@@ -136,7 +136,7 @@ ID3D12DescriptorHeap* createRenderTargetViewDescriptorHeap(ID3D12Device* dev) {
 
 std::vector<ID3D12Resource*> createRenderTargetViewAndGetBuckBuffers(ID3D12Device* dev, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
 
-	// ãƒãƒƒãƒ•ã‚¡æ•°ã‚’å–å¾—ï¼ˆãƒ€ãƒ–ãƒ«ãƒãƒƒãƒ•ã‚¡ãªã‚‰2ï¼‰
+	// ƒoƒbƒtƒ@”‚ðŽæ“¾iƒ_ƒuƒ‹ƒoƒbƒtƒ@‚È‚ç2j
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 	auto result = swapChain->GetDesc(&swapChainDesc);
 	auto bufferCount = swapChainDesc.BufferCount;
@@ -172,7 +172,7 @@ D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
 
 void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, IDXGISwapChain4* swapChain) {
 
-	// ãƒãƒªã‚¢ã‚’è¨­å®š
+	// ƒoƒŠƒA‚ðÝ’è
 	ID3D12Resource* backBuffer;
 	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
 	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
@@ -182,16 +182,16 @@ void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12Gr
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	commandList->ResourceBarrier(1, &resourceBarrier);
 
-	// ã“ã‚Œã‹ã‚‰ä½¿ã†ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã¨ã—ã¦rtvHandleã‚’ã‚»ãƒƒãƒˆã™ã‚‹
+	// ‚±‚ê‚©‚çŽg‚¤ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Æ‚µ‚ÄrtvHandle‚ðƒZƒbƒg‚·‚é
 	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
 
-	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°
+	// ƒŒƒ“ƒ_ƒŠƒ“ƒO
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-	// ãƒãƒªã‚¢ã«ã‚ˆã‚‹å®Œäº†å¾…ã¡
+	// ƒoƒŠƒA‚É‚æ‚éŠ®—¹‘Ò‚¿
 	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	commandList->ResourceBarrier(1, &resourceBarrier);
