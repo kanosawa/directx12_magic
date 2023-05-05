@@ -198,62 +198,36 @@ int main() {
 
 	map<string, ID3D12Resource*> resourceTable;
 
-	for (int i = 0; i < materialNum; ++i) {
+	for (int material_idx = 0; material_idx < materialNum; ++material_idx) {
 
-		toonResources[i] = loadToonTexture(dev, resourceTable, materials[i].toonIdx);
+		toonResources[material_idx] = loadToonTexture(dev, resourceTable, materials[material_idx].toonIdx);
 
-		if (materials[i].texFilePath.length() == 0) {
+		if (materials[material_idx].texFilePath.length() == 0) {
 			continue;
 		}
 
-		string texFileName = materials[i].texFilePath;
-		string sphFileName = "";
-		string spaFileName = "";
-		if (count(texFileName.begin(), texFileName.end(), '*') > 0) {//スプリッタがある
-			auto namepair = SplitFileName(texFileName);
-			if (GetExtension(namepair.first) == "sph") {
-				texFileName = string("model/") + namepair.second;
-				sphFileName = string("model/") + namepair.first;
-			}
-			else if (GetExtension(namepair.first) == "spa") {
-				texFileName = string("model/") + namepair.second;
-				spaFileName = string("model/") + namepair.first;
-			}
-			else {
-				texFileName = namepair.first;
-				if (GetExtension(namepair.second) == "sph") {
-					sphFileName = string("model/") + namepair.second;
-				}
-				else if (GetExtension(namepair.second) == "spa") {
-					spaFileName = string("model/") + namepair.second;
-				}
-			}
+		vector<string> texFilePathes;
+		if (count(materials[material_idx].texFilePath.begin(), materials[material_idx].texFilePath.end(), '*') > 0) { //スプリッタがある
+			auto namepair = SplitFileName(materials[material_idx].texFilePath);
+			texFilePathes.push_back(string("model/") + namepair.first);
+			texFilePathes.push_back(string("model/") + namepair.second);
 		}
 		else {
-			if (GetExtension(materials[i].texFilePath) == "sph") {
-				sphFileName = string("model/") + materials[i].texFilePath;
-				texFileName = "";
+			texFilePathes.push_back(string("model/") + materials[material_idx].texFilePath);
+		}
+
+		for (auto path_idx = 0; path_idx < texFilePathes.size(); ++path_idx) {
+			auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFilePathes[path_idx].c_str());
+			auto ext = GetExtension(texFilePath);
+			if (ext == "sph") {
+				sphResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
 			}
-			else if (GetExtension(materials[i].texFilePath) == "spa") {
-				spaFileName = string("model/") + materials[i].texFilePath;
-				texFileName = "";
+			else if (ext == "spa") {
+				spaResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
 			}
 			else {
-				texFileName = string("model/") + materials[i].texFilePath;
+				textureResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
 			}
-		}
-		//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
-		if (texFileName != "") {
-			auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
-			textureResources[i] = loadTexture(dev, resourceTable, texFilePath);
-		}
-		if (sphFileName != "") {
-			auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
-			sphResources[i] = loadTexture(dev, resourceTable, sphFilePath);
-		}
-		if (spaFileName != "") {
-			auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
-			spaResources[i] = loadTexture(dev, resourceTable, spaFilePath);
 		}
 	}
 	
