@@ -49,3 +49,10 @@ D3D12_RECT createScissorRect(int windowWidth, int windowHeight);
 
 // バリアを作成（排他制御のための仕組み）
 D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);
+
+// ルートシグネチャを作成（頂点情報以外のデータをシェーダーに送るための仕組み）
+// Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
+ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
+
+// レンダリング処理（のコマンドリストへの登録）
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect);

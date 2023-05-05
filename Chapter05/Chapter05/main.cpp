@@ -57,7 +57,7 @@ int main() {
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
-	auto rootSignature = createRootSignature(dev);
+	auto rootSignature = createRootSignature05(dev);
 	auto inputLayout = createInputLayout05();
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
 	auto viewport = createViewPort(windowWidth, windowHeight);

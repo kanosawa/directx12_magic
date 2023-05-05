@@ -102,7 +102,7 @@ void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D
 }
 
 
-ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
+ID3D12RootSignature* createRootSignature05(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
 	D3D12_DESCRIPTOR_RANGE descTableRange = {};

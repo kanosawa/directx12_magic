@@ -195,3 +195,75 @@ D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
 	resourceBarrier.Transition.Subresource = 0;
 	return resourceBarrier;
 }
+
+
+// ルートシグネチャを作成（頂点情報以外のデータをシェーダーに送るための仕組み）
+// Chapter04では頂点情報しか使わないので、空のルートシグネチャを作成する
+ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
+
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor = {};
+	rootSignatureDescriptor.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	ID3DBlob* rootSignatureBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	auto result = D3D12SerializeRootSignature(
+		&rootSignatureDescriptor,
+		D3D_ROOT_SIGNATURE_VERSION_1_0,
+		&rootSignatureBlob,
+		&errorBlob
+	);
+
+	ID3D12RootSignature* rootSignature = nullptr;
+	result = dev->CreateRootSignature(
+		0,
+		rootSignatureBlob->GetBufferPointer(),
+		rootSignatureBlob->GetBufferSize(),
+		IID_PPV_ARGS(&rootSignature)
+	);
+	rootSignatureBlob->Release();
+
+	return rootSignature;
+}
+
+
+// レンダリング処理（のコマンドリストへの登録）
+void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect) {
+
+	// バリアを設定
+	ID3D12Resource* backBuffer;
+	auto bufferIdx = swapChain->GetCurrentBackBufferIndex();
+	auto result = swapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&backBuffer));
+	auto resourceBarrier = createResourceBarrier(backBuffer);
+
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+
+	// パイプラインステートをセット
+	commandList->SetPipelineState(pipelineState);
+
+	// これから使うレンダーターゲットビューとしてrtvHandleをセット
+	auto rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += bufferIdx * dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
+
+	// クリア
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	// レンダリング設定
+	commandList->RSSetViewports(1, &viewport);
+	commandList->RSSetScissorRects(1, &scissorRect);
+	commandList->SetGraphicsRootSignature(rootSignature);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetIndexBuffer(&indexBufferView);
+
+	// レンダリング
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+	// バリアによる完了待ち
+	resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	commandList->ResourceBarrier(1, &resourceBarrier);
+}
