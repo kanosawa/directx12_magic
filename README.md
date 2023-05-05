@@ -11,7 +11,7 @@
 
 ## 使い方
 
-Clone後、各チャプターフォルダのslnファイルをVisual Studio 2019で開き、Debugモードで実行してください。それ以外の環境で実行する場合は、[書籍](https://www.shoeisha.co.jp/book/detail/9784798161938)を参照して、DirectXTex/DirectXTex.libを差し替えるなどの作業を行う必要があります。また、[公式実装](https://github.com/boxerprogrammer/directx12_samples)同様、Chapter07以降の実行にはPMDモデルファイルの用意が必要です。
+Clone後、各チャプターフォルダのslnファイルをVisual Studio 2019で開き、x64/Debugモードで実行してください。それ以外の環境で実行する場合は、[書籍](https://www.shoeisha.co.jp/book/detail/9784798161938)を参照して、DirectXTex/DirectXTex.libを差し替えるなどの作業を行う必要があります。また、[公式実装](https://github.com/boxerprogrammer/directx12_samples)同様、Chapter07以降の実行にはPMDモデルファイルの用意が必要です。
 
 ## 本リポジトリの長所
 
