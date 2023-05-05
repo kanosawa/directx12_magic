@@ -146,6 +146,21 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textur
 }
 
 
+ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, std::string& texPath) {
+
+	//テーブルに内にあったらロードするのではなくマップ内のリソースを返す
+	auto it = resourceTable.find(texPath);
+	if (it != resourceTable.end()) {
+		return resourceTable[texPath];
+	}
+
+	auto texbuff = loadTextureAndCreateBuffer(dev, texPath);
+	resourceTable[texPath] = texbuff;
+
+	return texbuff;
+}
+
+
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）

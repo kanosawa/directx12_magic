@@ -81,5 +81,8 @@ std::vector<Material> transformMaterials(std::vector<PMDMaterial> pmdMaterials);
 // テクスチャファイルを読み込み、バッファを作成（複数拡張子対応版）
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename);
 
+// テクスチャファイルを読み込む
+ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, std::string& texPath);
+
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

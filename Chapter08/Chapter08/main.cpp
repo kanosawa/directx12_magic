@@ -156,25 +156,6 @@ CreateBlackTexture() {
 }
 
 
-//ファイル名パスとリソースのマップテーブル
-map<string, ID3D12Resource*> _resourceTable;
-
-ID3D12Resource* LoadTextureFromFile(std::string& texPath) {
-
-	auto it = _resourceTable.find(texPath);
-	if (it != _resourceTable.end()) {
-		//テーブルに内にあったらロードするのではなくマップ内の
-		//リソースを返す
-		return _resourceTable[texPath];
-	}
-
-	auto texbuff = loadTextureAndCreateBuffer(dev, texPath);
-
-	_resourceTable[texPath] = texbuff;
-	return texbuff;
-}
-
-
 int main() {
 
 	const unsigned int windowWidth = 1280;
@@ -215,16 +196,17 @@ int main() {
 	vector<ID3D12Resource*> spaResources(materialNum);
 	vector<ID3D12Resource*> toonResources(materialNum);
 
+	map<string, ID3D12Resource*> resourceTable;
+
 	for (int i = 0; i < materialNum; ++i) {
 		//トゥーンリソースの読み込み
 		string toonFilePath = "toon/";
 		char toonFileName[16];
 		sprintf_s(toonFileName, 16, "toon%02d.bmp", materials[i].toonIdx + 1);
 		toonFilePath += toonFileName;
-		toonResources[i] = LoadTextureFromFile(toonFilePath);
+		toonResources[i] = loadTexture(dev, resourceTable, toonFilePath);
 
 		if (materials[i].texFilePath.length() == 0) {
-			textureResources[i] = nullptr;
 			continue;
 		}
 
@@ -267,15 +249,15 @@ int main() {
 		//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
 		if (texFileName != "") {
 			auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFileName.c_str());
-			textureResources[i] = LoadTextureFromFile(texFilePath);
+			textureResources[i] = loadTexture(dev, resourceTable, texFilePath);
 		}
 		if (sphFileName != "") {
 			auto sphFilePath = GetTexturePathFromModelAndTexPath(strModelPath, sphFileName.c_str());
-			sphResources[i] = LoadTextureFromFile(sphFilePath);
+			sphResources[i] = loadTexture(dev, resourceTable, sphFilePath);
 		}
 		if (spaFileName != "") {
 			auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
-			spaResources[i] = LoadTextureFromFile(spaFilePath);
+			spaResources[i] = loadTexture(dev, resourceTable, spaFilePath);
 		}
 	}
 	
