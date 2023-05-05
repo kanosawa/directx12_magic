@@ -41,7 +41,7 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* tex
 ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev);
 
 // シェーダーリソースビューを作成
-void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap);
+void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* textureDescriptorHeap, UINT64 idx);
 
 // バリアを作成（排他制御のための仕組み）
 D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);

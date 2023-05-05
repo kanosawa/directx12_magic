@@ -123,7 +123,7 @@ int main() {
 	// テクスチャ設定
 	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
 	auto texDescriptorHeap = createTexDescriptorHeap(dev);
-	createShaderResourceView(dev, texBuffer, texDescriptorHeap);
+	createShaderResourceView(dev, texBuffer, texDescriptorHeap, 0);
 
 	auto fence = createFence(dev);
 	ShowWindow(hwnd, SW_SHOW);
