@@ -43,6 +43,9 @@ ID3D12DescriptorHeap* createCbvSrvUavDescriptorHeap(ID3D12Device* dev, UINT64 nu
 // シェーダーリソースビューを作成
 void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* texDescHeap, UINT64 idx);
 
+// ルートシグネチャを作成
+ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
+
 // レンダリング処理（のコマンドリストへの登録）
 // basicDescHeapはChapter05の時点ではテクスチャ専用だが、Chapter06移行で定数と兼用になる
 void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,

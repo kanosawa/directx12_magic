@@ -119,7 +119,7 @@ int main() {
 
 	// パイプライン
 	auto rootSignature = createRootSignature(dev);
-	auto inputLayout = createInputLayout();
+	auto inputLayout = createInputLayout04();
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
