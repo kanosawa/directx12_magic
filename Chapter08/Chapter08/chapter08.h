@@ -108,5 +108,8 @@ ID3D12Resource* createMaterialBuffer(ID3D12Device* dev, UINT64 datasize);
 // マテリアルバッファをマップ
 void mapMaterialBuffer(ID3D12Resource* materialBuffer, std::vector<Material> materials);
 
+// マテリアルバッファビューを作成
+void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer, ID3D12DescriptorHeap* descriptorHeap, TextureResources textureResources, UINT64 materialNum);
+
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

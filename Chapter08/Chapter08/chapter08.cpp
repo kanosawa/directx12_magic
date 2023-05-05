@@ -235,6 +235,214 @@ void mapMaterialBuffer(ID3D12Resource* materialBuffer, std::vector<Material> mat
 }
 
 
+ID3D12Resource* CreateWhiteTexture(ID3D12Device* dev) {
+
+	D3D12_HEAP_PROPERTIES texHeapProp = {};
+	texHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;//特殊な設定なのでdefaultでもuploadでもなく
+	texHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;//ライトバックで
+	texHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;//転送がL0つまりCPU側から直で
+	texHeapProp.CreationNodeMask = 0;//単一アダプタのため0
+	texHeapProp.VisibleNodeMask = 0;//単一アダプタのため0
+
+	D3D12_RESOURCE_DESC resDesc = {};
+	resDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	resDesc.Width = 4;//幅
+	resDesc.Height = 4;//高さ
+	resDesc.DepthOrArraySize = 1;
+	resDesc.SampleDesc.Count = 1;
+	resDesc.SampleDesc.Quality = 0;//
+	resDesc.MipLevels = 1;//
+	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;//レイアウトについては決定しない
+	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;//とくにフラグなし
+
+	ID3D12Resource* whiteBuff = nullptr;
+	auto result = dev->CreateCommittedResource(
+		&texHeapProp,
+		D3D12_HEAP_FLAG_NONE,//特に指定なし
+		&resDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		nullptr,
+		IID_PPV_ARGS(&whiteBuff)
+	);
+	if (FAILED(result)) {
+		return nullptr;
+	}
+	std::vector<unsigned char> data(4 * 4 * 4);
+	std::fill(data.begin(), data.end(), 0xff);
+
+	result = whiteBuff->WriteToSubresource(0, nullptr, data.data(), 4 * 4, static_cast<UINT>(data.size()));
+	return whiteBuff;
+}
+
+ID3D12Resource* CreateBlackTexture(ID3D12Device* dev) {
+
+	D3D12_HEAP_PROPERTIES texHeapProp = {};
+	texHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;//特殊な設定なのでdefaultでもuploadでもなく
+	texHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;//ライトバックで
+	texHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;//転送がL0つまりCPU側から直で
+	texHeapProp.CreationNodeMask = 0;//単一アダプタのため0
+	texHeapProp.VisibleNodeMask = 0;//単一アダプタのため0
+
+	D3D12_RESOURCE_DESC resDesc = {};
+	resDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	resDesc.Width = 4;//幅
+	resDesc.Height = 4;//高さ
+	resDesc.DepthOrArraySize = 1;
+	resDesc.SampleDesc.Count = 1;
+	resDesc.SampleDesc.Quality = 0;//
+	resDesc.MipLevels = 1;//
+	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;//レイアウトについては決定しない
+	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;//とくにフラグなし
+
+	ID3D12Resource* blackBuff = nullptr;
+	auto result = dev->CreateCommittedResource(
+		&texHeapProp,
+		D3D12_HEAP_FLAG_NONE,//特に指定なし
+		&resDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		nullptr,
+		IID_PPV_ARGS(&blackBuff)
+	);
+	if (FAILED(result)) {
+		return nullptr;
+	}
+	std::vector<unsigned char> data(4 * 4 * 4);
+	std::fill(data.begin(), data.end(), 0x00);
+
+	result = blackBuff->WriteToSubresource(0, nullptr, data.data(), 4 * 4, static_cast<UINT>(data.size()));
+	return blackBuff;
+}
+
+
+ID3D12Resource* CreateGrayGradationTexture(ID3D12Device* dev) {
+
+	D3D12_RESOURCE_DESC resDesc = {};
+	resDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	resDesc.Width = 4;//幅
+	resDesc.Height = 256;//高さ
+	resDesc.DepthOrArraySize = 1;
+	resDesc.SampleDesc.Count = 1;
+	resDesc.SampleDesc.Quality = 0;//
+	resDesc.MipLevels = 1;//
+	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;//レイアウトについては決定しない
+	resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;//とくにフラグなし
+
+	D3D12_HEAP_PROPERTIES texHeapProp = {};
+	texHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;//特殊な設定なのでdefaultでもuploadでもなく
+	texHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;//ライトバックで
+	texHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;//転送がL0つまりCPU側から直で
+	texHeapProp.CreationNodeMask = 0;//単一アダプタのため0
+	texHeapProp.VisibleNodeMask = 0;//単一アダプタのため0
+
+	ID3D12Resource* gradBuff = nullptr;
+	auto result = dev->CreateCommittedResource(
+		&texHeapProp,
+		D3D12_HEAP_FLAG_NONE,//特に指定なし
+		&resDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		nullptr,
+		IID_PPV_ARGS(&gradBuff)
+	);
+	if (FAILED(result)) {
+		return nullptr;
+	}
+
+	//上が白くて下が黒いテクスチャデータを作成
+	std::vector<unsigned int> data(4 * 256);
+	auto it = data.begin();
+	unsigned int c = 0xff;
+	for (; it != data.end(); it += 4) {
+		auto col = (0xff << 24) | RGB(c, c, c);//RGBAが逆並びしているためRGBマクロと0xff<<24を用いて表す。
+		//auto col = (0xff << 24) | (c<<16)|(c<<8)|c;//これでもOK
+		std::fill(it, it + 4, col);
+		--c;
+	}
+
+	result = gradBuff->WriteToSubresource(0, nullptr, data.data(), 4 * sizeof(unsigned int), sizeof(unsigned int) * static_cast<UINT>(data.size()));
+	return gradBuff;
+}
+
+
+void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer, ID3D12DescriptorHeap* descriptorHeap, TextureResources textureResources, UINT64 materialNum) {
+
+	auto whiteTex = CreateWhiteTexture(dev);
+	auto blackTex = CreateBlackTexture(dev);
+	auto gradTex = CreateGrayGradationTexture(dev);
+
+	auto materialBuffSize = (sizeof(MaterialForHlsl) + 0xff) & ~0xff;
+
+	// マテリアル用のコンスタントバッファビューディスクリプタ
+	// 複数のマテリアルに対して、BufferLocationを書き換えながら再利用する
+	D3D12_CONSTANT_BUFFER_VIEW_DESC materialConstBufferViewDesc = {};
+	materialConstBufferViewDesc.BufferLocation = materialBuffer->GetGPUVirtualAddress();
+	materialConstBufferViewDesc.SizeInBytes = static_cast<UINT>(materialBuffSize);
+
+	// シェーダーリソースビューディスクリプタ
+	// 複数のテクスチャフォーマットに対して、Formatを書き換えながら再利用する
+	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	auto materialDescriptorHeapHandle = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	auto incSize = dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	for (size_t i = 0; i < materialNum; ++i) {
+
+		// マテリアル定数
+		dev->CreateConstantBufferView(&materialConstBufferViewDesc, materialDescriptorHeapHandle);
+		materialDescriptorHeapHandle.ptr += incSize;
+		materialConstBufferViewDesc.BufferLocation += materialBuffSize;
+
+		// 一般テクスチャ
+		if (textureResources.normalTex[i] == nullptr) {
+			shaderResourceViewDesc.Format = whiteTex->GetDesc().Format;
+			dev->CreateShaderResourceView(whiteTex, &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		else {
+			shaderResourceViewDesc.Format = textureResources.normalTex[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.normalTex[i], &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		materialDescriptorHeapHandle.ptr += incSize;
+
+		// SPH
+		if (textureResources.sph[i] == nullptr) {
+			shaderResourceViewDesc.Format = whiteTex->GetDesc().Format;
+			dev->CreateShaderResourceView(whiteTex, &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		else {
+			shaderResourceViewDesc.Format = textureResources.sph[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.sph[i], &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		materialDescriptorHeapHandle.ptr += incSize;
+
+		// SPA
+		if (textureResources.spa[i] == nullptr) {
+			shaderResourceViewDesc.Format = blackTex->GetDesc().Format;
+			dev->CreateShaderResourceView(blackTex, &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		else {
+			shaderResourceViewDesc.Format = textureResources.spa[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.spa[i], &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		materialDescriptorHeapHandle.ptr += incSize;
+
+		// トゥーン
+		if (textureResources.toon[i] == nullptr) {
+			shaderResourceViewDesc.Format = gradTex->GetDesc().Format;
+			dev->CreateShaderResourceView(gradTex, &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		else {
+			shaderResourceViewDesc.Format = textureResources.toon[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.toon[i], &shaderResourceViewDesc, materialDescriptorHeapHandle);
+		}
+		materialDescriptorHeapHandle.ptr += incSize;
+	}
+}
+
+
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
