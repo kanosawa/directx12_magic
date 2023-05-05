@@ -101,7 +101,7 @@ std::vector<Material> transformMaterials(std::vector<PMDMaterial> pmdMaterials) 
 }
 
 
-ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename) {
+ID3D12Resource* loadTextureAndCreateBuffer08(ID3D12Device* dev, std::string textureFilename) {
 
 	HRESULT result;
 	
@@ -155,7 +155,7 @@ ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resou
 		return resourceTable[texPath];
 	}
 
-	auto texbuff = loadTextureAndCreateBuffer(dev, texPath);
+	auto texbuff = loadTextureAndCreateBuffer08(dev, texPath);
 	resourceTable[texPath] = texbuff;
 
 	return texbuff;
@@ -387,7 +387,7 @@ void createMaterialBufferView(ID3D12Device* dev, ID3D12Resource* materialBuffer,
 }
 
 
-ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
+ID3D12RootSignature* createRootSignature08(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
 	D3D12_DESCRIPTOR_RANGE descTableRange[3] = {};
@@ -470,7 +470,7 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 }
 
 
-void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView,
+void render08(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView, D3D12_INDEX_BUFFER_VIEW indexBufferView,
 	IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState, D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap,
 	ID3D12DescriptorHeap* materialDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, std::vector<Material> materials)
 {

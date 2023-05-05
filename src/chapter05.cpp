@@ -1,7 +1,7 @@
 #include "chapter05.h"
 
 
-void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices) {
+void mapVertexBuffer05(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices) {
 	Vertex* vertexBufferMap = nullptr;
 	auto result = vertexBuffer->Map(0, nullptr, (void**)&vertexBufferMap);
 	std::copy(std::begin(vertices), std::end(vertices), vertexBufferMap);
@@ -9,7 +9,7 @@ void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices)
 }
 
 
-D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices) {
+D3D12_VERTEX_BUFFER_VIEW createVertexBufferView05(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices) {
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 	vertexBufferView.SizeInBytes = sizeof(vertices[0]) * vertices.size();
@@ -17,15 +17,15 @@ D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, st
 	return vertexBufferView;
 }
 
-/*
-std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
+
+std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout05() {
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	return inputLayout;
 }
-*/
+
 
 D3D12_HEAP_PROPERTIES createTexHeapProperties() {
 	D3D12_HEAP_PROPERTIES texHeapProperties = {};
@@ -111,7 +111,7 @@ D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer) {
 }
 
 
-void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
+void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap)
 {

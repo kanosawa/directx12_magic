@@ -43,15 +43,15 @@ int main() {
 
 	// Chapter04
 	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
-	mapVertexBuffer(vertexBuffer, vertices);
-	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
+	mapVertexBuffer07(vertexBuffer, vertices);
+	auto vertexBufferView = createVertexBufferView07(vertexBuffer, vertices);
 	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
-	auto rootSignature = createRootSignature(dev);
-	auto inputLayout = createInputLayout();
+	auto rootSignature = createRootSignature08(dev);
+	auto inputLayout = createInputLayout07();
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
@@ -66,7 +66,7 @@ int main() {
 
 	// 座標変換マトリクス
 	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 1);
-	auto constBuffer = createConstBuffer(dev);
+	auto constBuffer = createConstBuffer07(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 0);
 
 	// デプスバッファ
@@ -115,7 +115,7 @@ int main() {
 		mapScene->proj = projMat;
 		angle += 0.01f;
 
-		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState,
+		render08(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState,
 			viewport, scissorRect, basicDescriptorHeap, materialDescriptorHeap, depthDescriptorHeap, materials);
 		commandList->Close();
 

@@ -1,15 +1,14 @@
 #include "chapter06.h"
 
 
-/*
-ID3D12Resource* createConstBuffer(ID3D12Device* dev) {
+ID3D12Resource* createConstBuffer06(ID3D12Device* dev) {
 	ID3D12Resource* constBuffer = nullptr;
 	auto constHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	auto constResourceDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(XMMATRIX) + 0xff) & ~0xff);
 	auto result = dev->CreateCommittedResource(&constHeapProperties, D3D12_HEAP_FLAG_NONE, &constResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&constBuffer));
 	return constBuffer;
 }
-*/
+
 
 void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID3D12DescriptorHeap* basicDescriptorHeap, UINT64 idx) {
 	D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDesc = {};
@@ -21,8 +20,7 @@ void createConstantBufferView(ID3D12Device* dev, ID3D12Resource* constBuffer, ID
 }
 
 
-/*
-ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
+ID3D12RootSignature* createRootSignature06(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）
 	D3D12_DESCRIPTOR_RANGE descTableRange[2] = {};
@@ -82,4 +80,3 @@ ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	return rootSignature;
 }
-*/

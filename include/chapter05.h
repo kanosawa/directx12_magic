@@ -20,14 +20,13 @@ struct Vertex {
 
 
 // 頂点バッファをマップ（Vertex版）
-void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices);
+void mapVertexBuffer05(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices);
 
 // 頂点バッファビューを作成（Vertex版）
-D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices);
+D3D12_VERTEX_BUFFER_VIEW createVertexBufferView05(ID3D12Resource* vertexBuffer, std::vector<Vertex> vertices);
 
 // インプットレイアウトを作成（TEXCOORD追加版）
-// ※chapter07で再定義
-// std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout();
+std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout05();
 
 // テクスチャヒーププロパティを作成
 D3D12_HEAP_PROPERTIES createTexHeapProperties();
@@ -49,6 +48,6 @@ D3D12_RESOURCE_BARRIER createResourceBarrier(ID3D12Resource* backBuffer);
 
 // レンダリング処理（のコマンドリストへの登録）
 // basicDescHeapはChapter05の時点ではテクスチャ専用だが、Chapter06移行で定数と兼用になる
-void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
+void render05(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap);

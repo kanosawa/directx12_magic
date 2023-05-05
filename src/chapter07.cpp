@@ -46,7 +46,7 @@ PMD_MODEL_07 readPmdFile07(std::string pmdFileName) {
 }
 
 
-void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices) {
+void mapVertexBuffer07(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices) {
 	PMD_VERTEX* vertexBufferMap = nullptr;
 	auto result = vertexBuffer->Map(0, nullptr, (void**)&vertexBufferMap);
 	std::copy(std::begin(vertices), std::end(vertices), vertexBufferMap);
@@ -54,7 +54,7 @@ void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> verti
 }
 
 
-D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices) {
+D3D12_VERTEX_BUFFER_VIEW createVertexBufferView07(ID3D12Resource* vertexBuffer, std::vector<PMD_VERTEX> vertices) {
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 	vertexBufferView.SizeInBytes = vertices.size() * sizeof(PMD_VERTEX);
@@ -63,7 +63,7 @@ D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, st
 }
 
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
+std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout07() {
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -75,7 +75,7 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> createInputLayout() {
 	return inputLayout;
 }
 
-ID3D12Resource* createConstBuffer(ID3D12Device* dev) {
+ID3D12Resource* createConstBuffer07(ID3D12Device* dev) {
 	ID3D12Resource* constBuffer = nullptr;
 	auto constHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	auto constResourceDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(MatricesData) + 0xff) & ~0xff);
@@ -129,7 +129,7 @@ void createDepthBufferView(ID3D12Device* dev, ID3D12Resource* depthBuffer, ID3D1
 }
 
 
-void render(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
+void render07(ID3D12Device* dev, ID3D12DescriptorHeap* rtvDescriptorHeap, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vertexBufferView,
 	D3D12_INDEX_BUFFER_VIEW indexBufferView, IDXGISwapChain4* swapChain, ID3D12RootSignature* rootSignature, ID3D12PipelineState* pipelineState,
 	D3D12_VIEWPORT viewport, D3D12_RECT scissorRect, ID3D12DescriptorHeap* basicDescHeap, ID3D12DescriptorHeap* depthDescriptorHeap, unsigned int indicesNum)
 {
