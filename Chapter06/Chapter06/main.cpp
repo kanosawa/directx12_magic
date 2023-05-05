@@ -42,14 +42,10 @@ void main() {
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 
 	// Chapter04
-	auto vertexHeapProperties = createHeapProperties();
-	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
-	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
+	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
 	mapVertexBuffer(vertexBuffer, vertices);
 	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
-	auto indexHeapProperties = createHeapProperties();
-	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
-	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
+	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
@@ -63,11 +59,11 @@ void main() {
 	// Chapter05（TexDescriptorHeapをBasicDescriptorHeapに変更）
 	auto texBuffer = loadTextureAndCreateBuffer(dev, L"textest.png");
 	auto basicDescriptorHeap = createBasicDescriptorHeap(dev, 2);
-	createShaderResourceView(dev, texBuffer, basicDescriptorHeap);
+	createShaderResourceView(dev, texBuffer, basicDescriptorHeap, 0);
 
 	// 定数バッファ
 	auto constBuffer = createConstBuffer(dev);
-	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1);  // ShaderResourceViewの後なのでidx=1
+	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1);
 	
 	// マトリクス作成
 	XMFLOAT3 eye(0, 0, -5);
