@@ -7,6 +7,7 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <vector>
+#include <map>
 #include <d3dx12.h>
 #include <DirectXTex.h>
 #include "chapter07.h"
