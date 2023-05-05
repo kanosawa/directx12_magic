@@ -71,12 +71,14 @@ int main() {
 		ID3D12CommandList* constCommandList[] = { commandList };
 		commandQueue->ExecuteCommandLists(1, constCommandList);
 
-		// ƒŒƒ“ƒ_ƒŠƒ“ƒOŠ®—¹‘Ò‚¿
 		commandQueue->Signal(fence, ++fenceVal);
-		auto event = CreateEvent(nullptr, false, false, nullptr);
-		fence->SetEventOnCompletion(fenceVal, event);
-		WaitForSingleObject(event, INFINITE);
-		CloseHandle(event);
+		if (fence->GetCompletedValue() != fenceVal)
+		{
+			auto event = CreateEvent(nullptr, false, false, nullptr);
+			fence->SetEventOnCompletion(fenceVal, event);
+			WaitForSingleObject(event, INFINITE);
+			CloseHandle(event);
+		}
 
 		commandAllocator->Reset();
 		commandList->Reset(commandAllocator, nullptr);
