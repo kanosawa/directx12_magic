@@ -18,16 +18,16 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="chapter03.cpp">
+    <ClCompile Include="..\..\src\chapter03.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="chapter04.cpp">
+    <ClCompile Include="..\..\src\chapter04.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="chapter05.cpp">
+    <ClCompile Include="..\..\src\chapter05.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="chapter06.cpp">
+    <ClCompile Include="..\..\src\chapter06.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -39,16 +39,16 @@
     <None Include="BasicShaderHeader.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="chapter03.h">
+    <ClInclude Include="..\..\include\chapter03.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="chapter04.h">
+    <ClInclude Include="..\..\include\chapter04.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="chapter05.h">
+    <ClInclude Include="..\..\include\chapter05.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="chapter06.h">
+    <ClInclude Include="..\..\include\chapter06.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
