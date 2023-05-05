@@ -91,7 +91,6 @@ ID3D12DescriptorHeap* createTexDescriptorHeap(ID3D12Device* dev) {
 
 
 void createShaderResourceView(ID3D12Device* dev, ID3D12Resource* texBuffer, ID3D12DescriptorHeap* textureDescriptorHeap, UINT64 idx) {
-
 	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
 	shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	shaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
