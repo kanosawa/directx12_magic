@@ -161,6 +161,14 @@ ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resou
 }
 
 
+ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, unsigned char toonIdx) {
+	char toonFileName[16];
+	sprintf_s(toonFileName, 16, "toon%02d.bmp", toonIdx + 1);
+	auto toonFilePath = std::string("toon/") + toonFileName;
+	return loadTexture(dev, resourceTable, toonFilePath);
+}
+
+
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev) {
 
 	// ディスクリプタテーブルレンジ（複数のディスクリプタをまとめて使用できるようにするための仕組み）

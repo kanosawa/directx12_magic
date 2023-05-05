@@ -199,12 +199,8 @@ int main() {
 	map<string, ID3D12Resource*> resourceTable;
 
 	for (int i = 0; i < materialNum; ++i) {
-		//トゥーンリソースの読み込み
-		string toonFilePath = "toon/";
-		char toonFileName[16];
-		sprintf_s(toonFileName, 16, "toon%02d.bmp", materials[i].toonIdx + 1);
-		toonFilePath += toonFileName;
-		toonResources[i] = loadTexture(dev, resourceTable, toonFilePath);
+
+		toonResources[i] = loadToonTexture(dev, resourceTable, materials[i].toonIdx);
 
 		if (materials[i].texFilePath.length() == 0) {
 			continue;

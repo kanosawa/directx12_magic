@@ -84,5 +84,8 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textur
 // テクスチャファイルを読み込む
 ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, std::string& texPath);
 
+// トゥーンテクスチャファイルを読み込む
+ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, unsigned char toonIdx);
+
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);
