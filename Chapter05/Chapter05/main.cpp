@@ -107,15 +107,15 @@ int main() {
 
 	// Chapter04
 	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
-	mapVertexBuffer(vertexBuffer, vertices);
-	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
+	mapVertexBuffer05(vertexBuffer, vertices);
+	auto vertexBufferView = createVertexBufferView05(vertexBuffer, vertices);
 	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
 	auto rootSignature = createRootSignature(dev);
-	auto inputLayout = createInputLayout();
+	auto inputLayout = createInputLayout05();
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
@@ -138,7 +138,7 @@ int main() {
 		}
 		if (msg.message == WM_QUIT) break;
 
-		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, texDescriptorHeap);
+		render05(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, texDescriptorHeap);
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };

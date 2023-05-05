@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\DirectXTex</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\DirectXTex;..\..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,9 +141,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="chapter03.cpp" />
-    <ClCompile Include="chapter04.cpp" />
-    <ClCompile Include="chapter05.cpp" />
+    <ClCompile Include="..\..\src\chapter03.cpp" />
+    <ClCompile Include="..\..\src\chapter04.cpp" />
+    <ClCompile Include="..\..\src\chapter05.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,9 +162,9 @@
     <None Include="BasicShaderHeader.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="chapter03.h" />
-    <ClInclude Include="chapter04.h" />
-    <ClInclude Include="chapter05.h" />
+    <ClInclude Include="..\..\include\chapter03.h" />
+    <ClInclude Include="..\..\include\chapter04.h" />
+    <ClInclude Include="..\..\include\chapter05.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
