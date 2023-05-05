@@ -82,10 +82,14 @@ std::vector<Material> transformMaterials(std::vector<PMDMaterial> pmdMaterials);
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename);
 
 // テクスチャファイルを読み込む
-ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, std::string& texPath);
+ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::string& texPath);
 
 // トゥーンテクスチャファイルを読み込む
-ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, unsigned char toonIdx);
+ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, unsigned char toonIdx);
+
+// トゥーン以外のテクスチャファイルを読み込む
+void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::vector<ID3D12Resource*>& normalTexResources,
+	std::vector<ID3D12Resource*>& sphResources, std::vector<ID3D12Resource*>& spaResources, int material_idx, std::string texFileName, std::string modelPath);
 
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

@@ -199,36 +199,9 @@ int main() {
 	map<string, ID3D12Resource*> resourceTable;
 
 	for (int material_idx = 0; material_idx < materialNum; ++material_idx) {
-
 		toonResources[material_idx] = loadToonTexture(dev, resourceTable, materials[material_idx].toonIdx);
-
-		if (materials[material_idx].texFilePath.length() == 0) {
-			continue;
-		}
-
-		vector<string> texFilePathes;
-		if (count(materials[material_idx].texFilePath.begin(), materials[material_idx].texFilePath.end(), '*') > 0) { //スプリッタがある
-			auto namepair = SplitFileName(materials[material_idx].texFilePath);
-			texFilePathes.push_back(string("model/") + namepair.first);
-			texFilePathes.push_back(string("model/") + namepair.second);
-		}
-		else {
-			texFilePathes.push_back(string("model/") + materials[material_idx].texFilePath);
-		}
-
-		for (auto path_idx = 0; path_idx < texFilePathes.size(); ++path_idx) {
-			auto texFilePath = GetTexturePathFromModelAndTexPath(strModelPath, texFilePathes[path_idx].c_str());
-			auto ext = GetExtension(texFilePath);
-			if (ext == "sph") {
-				sphResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
-			}
-			else if (ext == "spa") {
-				spaResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
-			}
-			else {
-				textureResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
-			}
-		}
+		if (materials[material_idx].texFilePath.length() == 0) continue;
+		loadTextureExceptToon(dev, resourceTable, textureResources, sphResources, spaResources, material_idx, materials[material_idx].texFilePath, strModelPath);
 	}
 	
 	// Chapter04

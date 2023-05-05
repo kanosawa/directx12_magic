@@ -146,7 +146,7 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textur
 }
 
 
-ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, std::string& texPath) {
+ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::string& texPath) {
 
 	//テーブルに内にあったらロードするのではなくマップ内のリソースを返す
 	auto it = resourceTable.find(texPath);
@@ -161,11 +161,39 @@ ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resou
 }
 
 
-ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*> resourceTable, unsigned char toonIdx) {
+ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, unsigned char toonIdx) {
 	char toonFileName[16];
 	sprintf_s(toonFileName, 16, "toon%02d.bmp", toonIdx + 1);
 	auto toonFilePath = std::string("toon/") + toonFileName;
 	return loadTexture(dev, resourceTable, toonFilePath);
+}
+
+void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::vector<ID3D12Resource*>& normalTexResources, 
+	std::vector<ID3D12Resource*>& sphResources, std::vector<ID3D12Resource*>& spaResources, int material_idx, std::string texFileName, std::string modelPath)
+{
+	std::vector<std::string> texFilePathes;
+	if (std::count(texFileName.begin(), texFileName.end(), '*') > 0) { //スプリッタがある
+		auto namepair = SplitFileName(texFileName);
+		texFilePathes.push_back(std::string("model/") + namepair.first);
+		texFilePathes.push_back(std::string("model/") + namepair.second);
+	}
+	else {
+		texFilePathes.push_back(std::string("model/") + texFileName);
+	}
+
+	for (auto path_idx = 0; path_idx < texFilePathes.size(); ++path_idx) {
+		auto texFilePath = GetTexturePathFromModelAndTexPath(modelPath, texFilePathes[path_idx].c_str());
+		auto ext = GetExtension(texFilePath);
+		if (ext == "sph") {
+			sphResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
+		}
+		else if (ext == "spa") {
+			spaResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
+		}
+		else {
+			normalTexResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
+		}
+	}
 }
 
 
