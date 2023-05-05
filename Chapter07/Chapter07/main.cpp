@@ -38,22 +38,22 @@ void main() {
 
 	// Chapter04
 	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
-	mapVertexBuffer(vertexBuffer, vertices);
-	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
+	mapVertexBuffer07(vertexBuffer, vertices);
+	auto vertexBufferView = createVertexBufferView07(vertexBuffer, vertices);
 	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 	auto vertexShaderBlob = createVertexShaderBlob();
 	auto pixelShaderBlob = createPixelShaderBlob();
-	auto rootSignature = createRootSignature(dev);
-	auto inputLayout = createInputLayout();
+	auto rootSignature = createRootSignature06(dev);
+	auto inputLayout = createInputLayout07();
 	auto pipelineState = createGraphicsPipelineState(dev, vertexShaderBlob, pixelShaderBlob, rootSignature, inputLayout);
 	auto viewport = createViewPort(windowWidth, windowHeight);
 	auto scissorRect = createScissorRect(windowWidth, windowHeight);
 
 	// Chapter05, 06
 	auto basicDescriptorHeap = createCbvSrvUavDescriptorHeap(dev, 2); // テクスチャは無く、定数のみだが、ルートシグネチャをChapter06と共通化するためにnumDescriptor=2としておく
-	auto constBuffer = createConstBuffer(dev);
+	auto constBuffer = createConstBuffer07(dev);
 	createConstantBufferView(dev, constBuffer, basicDescriptorHeap, 1); // 上記同様、ShaderResourceViewがある想定で、idx=1としている
 
 	// デプスバッファ
@@ -91,7 +91,7 @@ void main() {
 		mapMatrix->world = worldMat;
 		mapMatrix->viewproj = viewMat * projMat;
 
-		render(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, basicDescriptorHeap, depthDescriptorHeap, indices.size());
+		render07(dev, rtvDescriptorHeap, commandList, vertexBufferView, indexBufferView, swapChain, rootSignature, pipelineState, viewport, scissorRect, basicDescriptorHeap, depthDescriptorHeap, indices.size());
 		commandList->Close();
 
 		ID3D12CommandList* constCommandList[] = { commandList };
