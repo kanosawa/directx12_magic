@@ -1,3 +1,4 @@
+#include "chapter03.h"
 #include "chapter05.h"
 #include "chapter07.h"
 
