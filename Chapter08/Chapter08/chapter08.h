@@ -54,6 +54,15 @@ struct Material {
 };
 
 
+// テクスチャリソース（バッファ）
+struct TextureResources {
+	std::vector<ID3D12Resource*> normalTex;
+	std::vector<ID3D12Resource*> sph;
+	std::vector<ID3D12Resource*> spa;
+	std::vector<ID3D12Resource*> toon;
+};
+
+
 // PMDモデル構造体
 struct PMD_MODEL_08 {
 	std::vector<PMD_VERTEX> vertices;
@@ -87,9 +96,11 @@ ID3D12Resource* loadTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resou
 // トゥーンテクスチャファイルを読み込む
 ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, unsigned char toonIdx);
 
+// テクスチャリソース（バッファ）を作成
+TextureResources createTextureResources(ID3D12Device* dev, std::vector<Material> materials, std::string modelPath);
+
 // トゥーン以外のテクスチャファイルを読み込む
-void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::vector<ID3D12Resource*>& normalTexResources,
-	std::vector<ID3D12Resource*>& sphResources, std::vector<ID3D12Resource*>& spaResources, int material_idx, std::string texFileName, std::string modelPath);
+void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, TextureResources& textureResources, int material_idx, std::string texFileName, std::string modelPath);
 
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

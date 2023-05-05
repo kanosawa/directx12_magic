@@ -191,19 +191,8 @@ int main() {
 	auto materials = transformMaterials(pmdModel.materials);
 	auto materialNum = materials.size();
 
-	vector<ID3D12Resource*> textureResources(materialNum);
-	vector<ID3D12Resource*> sphResources(materialNum);
-	vector<ID3D12Resource*> spaResources(materialNum);
-	vector<ID3D12Resource*> toonResources(materialNum);
+	auto textureResources = createTextureResources(dev, materials, strModelPath);
 
-	map<string, ID3D12Resource*> resourceTable;
-
-	for (int material_idx = 0; material_idx < materialNum; ++material_idx) {
-		toonResources[material_idx] = loadToonTexture(dev, resourceTable, materials[material_idx].toonIdx);
-		if (materials[material_idx].texFilePath.length() == 0) continue;
-		loadTextureExceptToon(dev, resourceTable, textureResources, sphResources, spaResources, material_idx, materials[material_idx].texFilePath, strModelPath);
-	}
-	
 	// Chapter04
 	auto vertexHeapProperties = createHeapProperties();
 	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
@@ -292,43 +281,43 @@ int main() {
 		dev->CreateConstantBufferView(&matCBVDesc,matDescHeapH);
 		matDescHeapH.ptr += incSize;
 		matCBVDesc.BufferLocation += materialBuffSize;
-		if (textureResources[i] == nullptr) {
+		if (textureResources.normalTex[i] == nullptr) {
 			srvDesc.Format = whiteTex->GetDesc().Format;
 			dev->CreateShaderResourceView(whiteTex, &srvDesc, matDescHeapH);
 		}else{
-			srvDesc.Format = textureResources[i]->GetDesc().Format;
-			dev->CreateShaderResourceView(textureResources[i], &srvDesc, matDescHeapH);
+			srvDesc.Format = textureResources.normalTex[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.normalTex[i], &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += incSize;
 
-		if (sphResources[i] == nullptr) {
+		if (textureResources.sph[i] == nullptr) {
 			srvDesc.Format = whiteTex->GetDesc().Format;
 			dev->CreateShaderResourceView(whiteTex, &srvDesc, matDescHeapH);
 		}
 		else {
-			srvDesc.Format = sphResources[i]->GetDesc().Format;
-			dev->CreateShaderResourceView(sphResources[i], &srvDesc, matDescHeapH);
+			srvDesc.Format = textureResources.sph[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.sph[i], &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += incSize;
 
-		if (spaResources[i] == nullptr) {
+		if (textureResources.spa[i] == nullptr) {
 			srvDesc.Format = blackTex->GetDesc().Format;
 			dev->CreateShaderResourceView(blackTex, &srvDesc, matDescHeapH);
 		}
 		else {
-			srvDesc.Format = spaResources[i]->GetDesc().Format;
-			dev->CreateShaderResourceView(spaResources[i], &srvDesc, matDescHeapH);
+			srvDesc.Format = textureResources.spa[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.spa[i], &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += incSize;
 
 
-		if (toonResources[i] == nullptr) {
+		if (textureResources.toon[i] == nullptr) {
 			srvDesc.Format = gradTex->GetDesc().Format;
 			dev->CreateShaderResourceView(gradTex, &srvDesc, matDescHeapH);
 		}
 		else {
-			srvDesc.Format = toonResources[i]->GetDesc().Format;
-			dev->CreateShaderResourceView(toonResources[i], &srvDesc, matDescHeapH);
+			srvDesc.Format = textureResources.toon[i]->GetDesc().Format;
+			dev->CreateShaderResourceView(textureResources.toon[i], &srvDesc, matDescHeapH);
 		}
 		matDescHeapH.ptr += incSize;
 

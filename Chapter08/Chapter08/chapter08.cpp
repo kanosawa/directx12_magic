@@ -168,9 +168,9 @@ ID3D12Resource* loadToonTexture(ID3D12Device* dev, std::map<std::string, ID3D12R
 	return loadTexture(dev, resourceTable, toonFilePath);
 }
 
-void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, std::vector<ID3D12Resource*>& normalTexResources, 
-	std::vector<ID3D12Resource*>& sphResources, std::vector<ID3D12Resource*>& spaResources, int material_idx, std::string texFileName, std::string modelPath)
-{
+
+void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resource*>& resourceTable, TextureResources& textureResources, int material_idx, std::string texFileName, std::string modelPath) {
+
 	std::vector<std::string> texFilePathes;
 	if (std::count(texFileName.begin(), texFileName.end(), '*') > 0) { //スプリッタがある
 		auto namepair = SplitFileName(texFileName);
@@ -185,15 +185,34 @@ void loadTextureExceptToon(ID3D12Device* dev, std::map<std::string, ID3D12Resour
 		auto texFilePath = GetTexturePathFromModelAndTexPath(modelPath, texFilePathes[path_idx].c_str());
 		auto ext = GetExtension(texFilePath);
 		if (ext == "sph") {
-			sphResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
+			textureResources.sph[material_idx] = loadTexture(dev, resourceTable, texFilePath);
 		}
 		else if (ext == "spa") {
-			spaResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
+			textureResources.spa[material_idx] = loadTexture(dev, resourceTable, texFilePath);
 		}
 		else {
-			normalTexResources[material_idx] = loadTexture(dev, resourceTable, texFilePath);
+			textureResources.normalTex[material_idx] = loadTexture(dev, resourceTable, texFilePath);
 		}
 	}
+}
+
+
+TextureResources createTextureResources(ID3D12Device* dev, std::vector<Material> materials, std::string modelPath) {
+
+	std::map<std::string, ID3D12Resource*> resourceTable;
+	TextureResources textureResources;
+	textureResources.normalTex.resize(materials.size());
+	textureResources.sph.resize(materials.size());
+	textureResources.spa.resize(materials.size());
+	textureResources.toon.resize(materials.size());
+
+	for (int material_idx = 0; material_idx < materials.size(); ++material_idx) {
+		textureResources.toon[material_idx] = loadToonTexture(dev, resourceTable, materials[material_idx].toonIdx);
+		if (materials[material_idx].texFilePath.length() == 0) continue;
+		loadTextureExceptToon(dev, resourceTable, textureResources, material_idx, materials[material_idx].texFilePath, modelPath);
+	}
+
+	return textureResources;
 }
 
 
