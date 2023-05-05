@@ -46,8 +46,11 @@ struct MaterialForHlsl {
 
 // レンダリング用マテリアル構造体
 struct Material {
-	unsigned int indicesNum;
 	MaterialForHlsl materialForHlsl;
+	unsigned char toonIdx;
+	unsigned char edgeFlg;
+	unsigned int indicesNum;
+	std::string texFilePath;
 };
 
 
@@ -73,7 +76,7 @@ std::vector<PMDMaterial> readPmdMaterials(FILE* fp);
 PMD_MODEL_08 readPmdFile08(std::string pmdFileName);
 
 // PMDMaterialからMaterialへマテリアル情報をコピー
-std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials);
+std::vector<Material> transformMaterials(std::vector<PMDMaterial> pmdMaterials);
 
 // テクスチャファイルを読み込み、バッファを作成（複数拡張子対応版）
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename);

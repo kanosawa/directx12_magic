@@ -83,15 +83,18 @@ PMD_MODEL_08 readPmdFile08(std::string pmdFileName) {
 }
 
 
-std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials) {
+std::vector<Material> transformMaterials(std::vector<PMDMaterial> pmdMaterials) {
 	std::vector<Material> materials(pmdMaterials.size());
 	for (int i = 0; i < pmdMaterials.size(); ++i) {
-		materials[i].indicesNum = pmdMaterials[i].indicesNum;
 		materials[i].materialForHlsl.diffuse = pmdMaterials[i].diffuse;
 		materials[i].materialForHlsl.alpha = pmdMaterials[i].alpha;
 		materials[i].materialForHlsl.specular = pmdMaterials[i].specular;
 		materials[i].materialForHlsl.specularity = pmdMaterials[i].specularity;
 		materials[i].materialForHlsl.ambient = pmdMaterials[i].ambient;
+		materials[i].toonIdx = pmdMaterials[i].toonIdx;
+		materials[i].edgeFlg = pmdMaterials[i].edgeFlg;
+		materials[i].indicesNum = pmdMaterials[i].indicesNum;
+		materials[i].texFilePath = pmdMaterials[i].texFilePath;
 	}
 	return materials;
 }
@@ -99,12 +102,13 @@ std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials) {
 
 ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename) {
 
-	TexMetadata metadata = {};
-	ScratchImage scratchImg = {};
+	HRESULT result;
 	
 	auto ext = GetExtension(textureFilename);
 	auto wTextureFilename = GetWideStringFromString(textureFilename);
-	HRESULT result;
+
+	TexMetadata metadata = {};
+	ScratchImage scratchImg = {};
 	if (ext == "sph" || ext == "spa" || ext == "bmp" || ext == "png" || ext == "jpg") {
 		result = LoadFromWICFile(wTextureFilename.c_str(), WIC_FLAGS_NONE , &metadata, scratchImg);
 	}
@@ -117,16 +121,13 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textur
 	else {
 		result = E_FAIL;
 	}
-
 	if (FAILED(result)) {
 		return nullptr;
 	}
-
 	auto img = scratchImg.GetImage(0, 0, 0);
 
 	auto texHeapProperties = createTexHeapProperties();
 	auto texResourceDesc = createTexResourceDescriptor(metadata);
-
 	ID3D12Resource* texBuffer = nullptr;
 	result = dev->CreateCommittedResource(
 		&texHeapProperties,
@@ -136,7 +137,6 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textur
 		nullptr,
 		IID_PPV_ARGS(&texBuffer)
 	);
-
 	if (FAILED(result)) {
 		return nullptr;
 	}

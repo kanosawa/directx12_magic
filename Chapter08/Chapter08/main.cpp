@@ -207,30 +207,28 @@ int main() {
 	auto pmdModel = readPmdFile08(strModelPath);
 	auto vertices = pmdModel.vertices;
 	auto indices = pmdModel.indices;
-	auto pmdMaterials = pmdModel.materials;
-	auto materialNum = pmdMaterials.size();
+	auto materials = transformMaterials(pmdModel.materials);
+	auto materialNum = materials.size();
 
 	vector<ID3D12Resource*> textureResources(materialNum);
 	vector<ID3D12Resource*> sphResources(materialNum);
 	vector<ID3D12Resource*> spaResources(materialNum);
 	vector<ID3D12Resource*> toonResources(materialNum);
 
-	auto materials = copyMaterials(pmdMaterials);
-
-	for (int i = 0; i < pmdMaterials.size(); ++i) {
+	for (int i = 0; i < materialNum; ++i) {
 		//トゥーンリソースの読み込み
 		string toonFilePath = "toon/";
 		char toonFileName[16];
-		sprintf_s(toonFileName, 16, "toon%02d.bmp", pmdMaterials[i].toonIdx + 1);
+		sprintf_s(toonFileName, 16, "toon%02d.bmp", materials[i].toonIdx + 1);
 		toonFilePath += toonFileName;
 		toonResources[i] = LoadTextureFromFile(toonFilePath);
 
-		if (strlen(pmdMaterials[i].texFilePath) == 0) {
+		if (materials[i].texFilePath.length() == 0) {
 			textureResources[i] = nullptr;
 			continue;
 		}
 
-		string texFileName = pmdMaterials[i].texFilePath;
+		string texFileName = materials[i].texFilePath;
 		string sphFileName = "";
 		string spaFileName = "";
 		if (count(texFileName.begin(), texFileName.end(), '*') > 0) {//スプリッタがある
@@ -254,16 +252,16 @@ int main() {
 			}
 		}
 		else {
-			if (GetExtension(pmdMaterials[i].texFilePath) == "sph") {
-				sphFileName = string("model/") + pmdMaterials[i].texFilePath;
+			if (GetExtension(materials[i].texFilePath) == "sph") {
+				sphFileName = string("model/") + materials[i].texFilePath;
 				texFileName = "";
 			}
-			else if (GetExtension(pmdMaterials[i].texFilePath) == "spa") {
-				spaFileName = string("model/") + pmdMaterials[i].texFilePath;
+			else if (GetExtension(materials[i].texFilePath) == "spa") {
+				spaFileName = string("model/") + materials[i].texFilePath;
 				texFileName = "";
 			}
 			else {
-				texFileName = string("model/") + pmdMaterials[i].texFilePath;
+				texFileName = string("model/") + materials[i].texFilePath;
 			}
 		}
 		//モデルとテクスチャパスからアプリケーションからのテクスチャパスを得る
@@ -279,8 +277,6 @@ int main() {
 			auto spaFilePath = GetTexturePathFromModelAndTexPath(strModelPath, spaFileName.c_str());
 			spaResources[i] = LoadTextureFromFile(spaFilePath);
 		}
-
-
 	}
 	
 	// Chapter04
