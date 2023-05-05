@@ -154,15 +154,13 @@ CreateBlackTexture() {
 	result = blackBuff->WriteToSubresource(0, nullptr, data.data(), 4 * 4, static_cast<UINT>(data.size()));
 	return blackBuff;
 }
-using LoadLambda_t = function<HRESULT(const wstring& path, TexMetadata*, ScratchImage&)>;
-map < string, LoadLambda_t> loadLambdaTable;
 
 
 //ファイル名パスとリソースのマップテーブル
 map<string, ID3D12Resource*> _resourceTable;
 
-ID3D12Resource*
-LoadTextureFromFile(std::string& texPath) {
+ID3D12Resource* LoadTextureFromFile(std::string& texPath) {
+
 	auto it = _resourceTable.find(texPath);
 	if (it != _resourceTable.end()) {
 		//テーブルに内にあったらロードするのではなくマップ内の
@@ -170,54 +168,7 @@ LoadTextureFromFile(std::string& texPath) {
 		return _resourceTable[texPath];
 	}
 
-
-	//WICテクスチャのロード
-	
-	
-	
-	TexMetadata metadata = {};
-	ScratchImage scratchImg = {};
-	
-	auto wtexpath = GetWideStringFromString(texPath);//テクスチャのファイルパス
-
-	
-	auto ext = GetExtension(texPath);//拡張子を取得
-	auto result = loadLambdaTable[ext](wtexpath,
-		&metadata,
-		scratchImg);
-	if (FAILED(result)) {
-		return nullptr;
-	}
-	auto img = scratchImg.GetImage(0, 0, 0);//生データ抽出
-
-	auto texHeapProp = createTexHeapProperties();
-	auto resDesc = createTexResourceDescriptor(metadata);
-
-	ID3D12Resource* texbuff = nullptr;
-	result = dev->CreateCommittedResource(
-		&texHeapProp,
-		D3D12_HEAP_FLAG_NONE,//特に指定なし
-		&resDesc,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		nullptr,
-		IID_PPV_ARGS(&texbuff)
-	);
-	if (FAILED(result)) {
-		return nullptr;
-	}
-	result = texbuff->WriteToSubresource(0,
-		nullptr,//全領域へコピー
-		img->pixels,//元データアドレス
-		static_cast<UINT>(img->rowPitch),//1ラインサイズ
-		static_cast<UINT>(img->slicePitch)//全サイズ
-	);
-	if (FAILED(result)) {
-		return nullptr;
-	}
-	
-
-	// auto texbuff = loadTextureAndCreateBuffer(dev, wtexpath.c_str());
-	
+	auto texbuff = loadTextureAndCreateBuffer(dev, texPath);
 
 	_resourceTable[texPath] = texbuff;
 	return texbuff;
@@ -251,18 +202,6 @@ int main() {
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 
 	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
-
-	loadLambdaTable["sph"] = loadLambdaTable["spa"] = loadLambdaTable["bmp"] = loadLambdaTable["png"] = loadLambdaTable["jpg"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, meta, img);
-	};
-
-	loadLambdaTable["tga"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromTGAFile(path.c_str(), meta, img);
-	};
-
-	loadLambdaTable["dds"] = [](const wstring& path, TexMetadata* meta, ScratchImage& img)->HRESULT {
-		return LoadFromDDSFile(path.c_str(), DDS_FLAGS_NONE, meta, img);
-	};
 
 	string strModelPath = "model/巡音ルカ.pmd";
 	auto pmdModel = readPmdFile08(strModelPath);

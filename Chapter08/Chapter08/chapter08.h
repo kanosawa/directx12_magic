@@ -76,7 +76,7 @@ PMD_MODEL_08 readPmdFile08(std::string pmdFileName);
 std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials);
 
 // テクスチャファイルを読み込み、バッファを作成（複数拡張子対応版）
-ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename);
+ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename);
 
 // ルートシグネチャを作成（マテリアル追加版）
 ID3D12RootSignature* createRootSignature(ID3D12Device* dev);

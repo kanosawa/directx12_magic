@@ -97,11 +97,31 @@ std::vector<Material> copyMaterials(std::vector<PMDMaterial> pmdMaterials) {
 }
 
 
-ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* textureFilename) {
+ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, std::string textureFilename) {
 
 	TexMetadata metadata = {};
 	ScratchImage scratchImg = {};
-	auto result = LoadFromWICFile(textureFilename, WIC_FLAGS_NONE, &metadata, scratchImg);
+	
+	auto ext = GetExtension(textureFilename);
+	auto wTextureFilename = GetWideStringFromString(textureFilename);
+	HRESULT result;
+	if (ext == "sph" || ext == "spa" || ext == "bmp" || ext == "png" || ext == "jpg") {
+		result = LoadFromWICFile(wTextureFilename.c_str(), WIC_FLAGS_NONE , &metadata, scratchImg);
+	}
+	else if (ext == "tga") {
+		result = LoadFromTGAFile(wTextureFilename.c_str(), &metadata, scratchImg);
+	}
+	else if (ext == "dds") {
+		result = LoadFromDDSFile(wTextureFilename.c_str(), DDS_FLAGS_NONE, &metadata, scratchImg);
+	}
+	else {
+		result = E_FAIL;
+	}
+
+	if (FAILED(result)) {
+		return nullptr;
+	}
+
 	auto img = scratchImg.GetImage(0, 0, 0);
 
 	auto texHeapProperties = createTexHeapProperties();
@@ -116,6 +136,11 @@ ID3D12Resource* loadTextureAndCreateBuffer(ID3D12Device* dev, const wchar_t* tex
 		nullptr,
 		IID_PPV_ARGS(&texBuffer)
 	);
+
+	if (FAILED(result)) {
+		return nullptr;
+	}
+
 	result = texBuffer->WriteToSubresource(0, nullptr, img->pixels, img->rowPitch, img->slicePitch);
 	return texBuffer;
 }
