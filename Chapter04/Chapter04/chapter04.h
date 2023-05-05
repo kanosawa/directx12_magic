@@ -11,14 +11,8 @@
 using namespace DirectX;
 
 
-// ヒーププロパティを作成（頂点座標とインデックス用）
-D3D12_HEAP_PROPERTIES createHeapProperties();
-
-// リソースディスクリプタを作成（頂点座標とインデックス用）
-D3D12_RESOURCE_DESC createResourceDescriptor(UINT64 dataSize);
-
 // 頂点バッファーを作成
-ID3D12Resource* createVertexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES vertexHeapProperties, D3D12_RESOURCE_DESC vertexResourceDescriptor);
+ID3D12Resource* createVertexBuffer(ID3D12Device* dev, UINT64 datasize);
 
 // 頂点座標情報をマップ
 void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertices);
@@ -27,7 +21,7 @@ void mapVertexBuffer(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertice
 D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, std::vector<XMFLOAT3> vertices);
 
 // インデックスバッファーを作成
-ID3D12Resource* createIndexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES indexHeapProperties, D3D12_RESOURCE_DESC indexResourceDescriptor);
+ID3D12Resource* createIndexBuffer(ID3D12Device* dev, UINT64 datasize);
 
 // インデックス情報をマップ
 void mapIndexBuffer(ID3D12Resource* indexBuffer, std::vector<unsigned short> indices);

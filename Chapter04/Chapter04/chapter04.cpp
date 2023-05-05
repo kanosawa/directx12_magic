@@ -25,17 +25,19 @@ D3D12_RESOURCE_DESC createResourceDescriptor(UINT64 dataSize) {
 }
 
 
-ID3D12Resource* createVertexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES vertexHeapProperties, D3D12_RESOURCE_DESC vertexResourceDescriptor) {
-	ID3D12Resource* vertexBuffer = nullptr;
+ID3D12Resource* createVertexBuffer(ID3D12Device* dev, UINT64 datasize) {
+	auto heapProperties = createHeapProperties();
+	auto resourceDescriptor = createResourceDescriptor(datasize);
+	ID3D12Resource* buffer = nullptr;
 	auto result = dev->CreateCommittedResource(
-		&vertexHeapProperties,
+		&heapProperties,
 		D3D12_HEAP_FLAG_NONE,
-		&vertexResourceDescriptor,
+		&resourceDescriptor,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&vertexBuffer)
+		IID_PPV_ARGS(&buffer)
 	);
-	return vertexBuffer;
+	return buffer;
 }
 
 
@@ -56,16 +58,9 @@ D3D12_VERTEX_BUFFER_VIEW createVertexBufferView(ID3D12Resource* vertexBuffer, st
 }
 
 
-ID3D12Resource* createIndexBuffer(ID3D12Device* dev, D3D12_HEAP_PROPERTIES indexHeapProperties, D3D12_RESOURCE_DESC indexResourceDescriptor) {
-	ID3D12Resource* indexBuffer = nullptr;
-	auto result = dev->CreateCommittedResource(
-		&indexHeapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&indexResourceDescriptor,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&indexBuffer));
-	return indexBuffer;
+ID3D12Resource* createIndexBuffer(ID3D12Device* dev, UINT64 datasize) {
+	// 頂点バッファの処理を流用
+	return createVertexBuffer(dev, datasize);
 }
 
 

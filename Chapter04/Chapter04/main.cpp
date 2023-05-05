@@ -104,16 +104,12 @@ int main() {
 	auto backBuffers = createRenderTargetViewAndGetBuckBuffers(dev, swapChain, rtvDescriptorHeap);
 	
 	// 頂点座標
-	auto vertexHeapProperties = createHeapProperties();
-	auto vertexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(vertices[0])) * vertices.size());
-	auto vertexBuffer = createVertexBuffer(dev, vertexHeapProperties, vertexResourceDescriptor);
+	auto vertexBuffer = createVertexBuffer(dev, UINT64(sizeof(vertices[0])) * vertices.size());
 	mapVertexBuffer(vertexBuffer, vertices);
 	auto vertexBufferView = createVertexBufferView(vertexBuffer, vertices);
 
 	// インデックス
-	auto indexHeapProperties = createHeapProperties();
-	auto indexResourceDescriptor = createResourceDescriptor(UINT64(sizeof(indices[0])) * indices.size());
-	auto indexBuffer = createIndexBuffer(dev, indexHeapProperties, indexResourceDescriptor);
+	auto indexBuffer = createIndexBuffer(dev, UINT64(sizeof(indices[0])) * indices.size());
 	mapIndexBuffer(indexBuffer, indices);
 	auto indexBufferView = createIndexBufferView(indexBuffer, indices);
 
